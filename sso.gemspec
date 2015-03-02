@@ -14,4 +14,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'signature'
   s.add_dependency 'trouble'
   s.add_dependency 'warden'
+
+  s.add_development_dependency 'rspec'
+  s.add_development_dependency 'guard-rspec'
 end
