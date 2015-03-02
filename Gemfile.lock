@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    sso (0.0.1)
+    sso (0.0.2)
       httparty
       omniauth-oauth2
       signature
