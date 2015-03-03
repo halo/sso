@@ -1,2 +1,8 @@
 .DS_Store
 *.gem
+/.bundle
+
+/spec/dummy/log/*.log
+/spec/dummy/log/*.age
+/spec/dummy/tmp
+/spec/dummy/config/secrets.yml
