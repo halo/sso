@@ -17,7 +17,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'signature'
   s.add_dependency 'warden'
 
-  s.add_development_dependency 'memory_test_fix'
   s.add_development_dependency 'sqlite3'
   s.add_development_dependency 'guard-rspec'
   s.add_development_dependency 'rspec-rails'

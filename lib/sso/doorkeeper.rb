@@ -3,7 +3,7 @@ module SSO
 
     def self.resource_owner_authenticator(&block)
       Proc.new do
-        true
+        OpenStruct.new id: 42
       end
     end
 
