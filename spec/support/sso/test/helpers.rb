@@ -13,7 +13,7 @@ module SSO
 
       def redirect_httparty(method)
         allow(HTTParty).to receive(method) do |url, options|
-          logger.warn "RSpec caught an outgoint HTTParty request to #{url.inspect} and re-routes it back into the Rails integration test framework..."
+          warn "RSpec caught an outgoint HTTParty request to #{url.inspect} and re-routes it back into the Rails integration test framework..."
 
           url = URI.parse url
           expect(url.host).to include '.example.com'

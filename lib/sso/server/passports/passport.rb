@@ -1,7 +1,9 @@
 module SSO
   module Server
     module Passports
-      class Backend < ActiveRecord::Base
+      # This could be MongoDB or whatever
+      class Passport < ActiveRecord::Base
+        include ::SSO::Logging
 
         before_validation :ensure_secret
         before_validation :ensure_group_id
@@ -36,7 +38,7 @@ module SSO
 
         def update_location
           location_name = ::SSO::Server::Geolocations.human_readable_location_for_ip self.ip
-          logger.debug { "Updating geolocation for #{self.ip} which is #{location_name}" }
+          debug { "Updating geolocation for #{self.ip} which is #{location_name}" }
           self.location = location_name
         end
 

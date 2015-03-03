@@ -1,5 +1,3 @@
-require 'sso/configuration'
-
 module SSO
 
   # Public: Lazy-loads and returns the the configuration instance.
