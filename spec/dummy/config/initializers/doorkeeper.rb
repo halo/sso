@@ -1,7 +1,7 @@
-Doorkeeper.configure do
+::Doorkeeper.configure do
   orm :active_record
 
-  resource_owner_authenticator SSO::Doorkeeper.resource_owner_authenticator
+  resource_owner_authenticator ::SSO::Server::Doorkeeper::ResourceOwnerAuthenticator
 
   # https://github.com/doorkeeper-gem/doorkeeper/wiki/Using-Scopes
   default_scopes  :outsider

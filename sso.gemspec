@@ -10,14 +10,18 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://github.com/halo/oauth-sso/issues/1'
   s.test_files  = Dir['spec/**/*'] & `git ls-files -z`.split("\0")
 
-  s.add_dependency 'factory_girl_rails'
-  s.add_dependency 'httparty'
   s.add_dependency 'doorkeeper'
+  s.add_dependency 'httparty'
   s.add_dependency 'omniauth-oauth2'
   s.add_dependency 'signature'
   s.add_dependency 'warden'
 
-  s.add_development_dependency 'sqlite3'
+  s.add_development_dependency 'database_cleaner'
+  s.add_development_dependency 'factory_girl_rails'
   s.add_development_dependency 'guard-rspec'
+  s.add_development_dependency 'pg'
+  s.add_development_dependency 'rails'
   s.add_development_dependency 'rspec-rails'
+  s.add_development_dependency 'timecop'
+  s.add_development_dependency 'webmock'
 end

@@ -1,4 +1,7 @@
 test:
-  adapter: sqlite3
-  database: ':memory:'
-  verbosity: silent
+  endpoint: 127.0.0.1
+  adapter: postgresql
+  database: sso_test
+  encoding: unicode
+  port: 5432
+  sslmode: disable

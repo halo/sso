@@ -11,7 +11,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150303054803) do
+ActiveRecord::Schema.define(version: 20150303132931) do
+
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+  enable_extension "uuid-ossp"
 
   create_table "oauth_access_grants", force: :cascade do |t|
     t.integer  "resource_owner_id", null: false
@@ -24,7 +28,7 @@ ActiveRecord::Schema.define(version: 20150303054803) do
     t.string   "scopes"
   end
 
-  add_index "oauth_access_grants", ["token"], name: "index_oauth_access_grants_on_token", unique: true
+  add_index "oauth_access_grants", ["token"], name: "index_oauth_access_grants_on_token", unique: true, using: :btree
 
   create_table "oauth_access_tokens", force: :cascade do |t|
     t.integer  "resource_owner_id"
@@ -37,9 +41,9 @@ ActiveRecord::Schema.define(version: 20150303054803) do
     t.string   "scopes"
   end
 
-  add_index "oauth_access_tokens", ["refresh_token"], name: "index_oauth_access_tokens_on_refresh_token", unique: true
-  add_index "oauth_access_tokens", ["resource_owner_id"], name: "index_oauth_access_tokens_on_resource_owner_id"
-  add_index "oauth_access_tokens", ["token"], name: "index_oauth_access_tokens_on_token", unique: true
+  add_index "oauth_access_tokens", ["refresh_token"], name: "index_oauth_access_tokens_on_refresh_token", unique: true, using: :btree
+  add_index "oauth_access_tokens", ["resource_owner_id"], name: "index_oauth_access_tokens_on_resource_owner_id", using: :btree
+  add_index "oauth_access_tokens", ["token"], name: "index_oauth_access_tokens_on_token", unique: true, using: :btree
 
   create_table "oauth_applications", force: :cascade do |t|
     t.string   "name",                      null: false
@@ -51,6 +55,33 @@ ActiveRecord::Schema.define(version: 20150303054803) do
     t.datetime "updated_at"
   end
 
-  add_index "oauth_applications", ["uid"], name: "index_oauth_applications_on_uid", unique: true
+  add_index "oauth_applications", ["uid"], name: "index_oauth_applications_on_uid", unique: true, using: :btree
+
+  create_table "passports", id: :uuid, default: "uuid_generate_v4()", force: :cascade do |t|
+    t.integer  "oauth_access_grant_id"
+    t.integer  "oauth_access_token_id"
+    t.integer  "application_id",        null: false
+    t.integer  "owner_id",              null: false
+    t.string   "group_id",              null: false
+    t.string   "secret",                null: false
+    t.inet     "ip",                    null: false
+    t.string   "agent"
+    t.string   "location"
+    t.datetime "activity_at",           null: false
+    t.datetime "revoked_at"
+    t.string   "revoke_reason"
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+  end
+
+  add_index "passports", ["application_id"], name: "index_passports_on_application_id", using: :btree
+  add_index "passports", ["group_id"], name: "index_passports_on_group_id", using: :btree
+  add_index "passports", ["ip"], name: "index_passports_on_ip", using: :btree
+  add_index "passports", ["oauth_access_grant_id"], name: "index_passports_on_oauth_access_grant_id", using: :btree
+  add_index "passports", ["oauth_access_token_id"], name: "index_passports_on_oauth_access_token_id", using: :btree
+  add_index "passports", ["owner_id", "oauth_access_token_id"], name: "one_access_token_per_owner", unique: true, where: "((revoked_at IS NULL) AND (oauth_access_token_id IS NOT NULL))", using: :btree
+  add_index "passports", ["owner_id"], name: "index_passports_on_owner_id", using: :btree
+  add_index "passports", ["revoke_reason"], name: "index_passports_on_revoke_reason", using: :btree
+  add_index "passports", ["secret"], name: "index_passports_on_secret", using: :btree
 
 end

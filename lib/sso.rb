@@ -3,13 +3,9 @@
 require 'warden'
 require 'doorkeeper'
 
-# Just load everthing right away.
-require 'sso/configure'
-require 'sso/logging'
-require 'sso/doorkeeper'
-require 'sso/warden/failure_app'
-require 'sso/doorkeeper/grant_marker'
-require 'sso/engine'
+require 'sso/client/warden'
 
-module SSO
-end
+require 'sso/server/doorkeeper'
+require 'sso/server/passports'
+require 'sso/server/passports/backend'
+require 'sso/server/users'
