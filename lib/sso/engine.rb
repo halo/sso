@@ -2,12 +2,14 @@ module SSO
   class Engine < ::Rails::Engine
     isolate_namespace SSO
 
-    middleware.insert_after ActionDispatch::Flash, Warden::Manager do |manager|
-      manager.failure_app = SSO::Unauthenticated
-      manager.intercept_401 = false
-    end
+    initializer "my_engine.add_middleware" do |app|
+      app.middleware.insert_after ::ActionDispatch::Flash, ::Warden::Manager do |manager|
+        manager.failure_app = ::SSO::Warden::FailureApp
+        manager.intercept_401 = false
+      end
 
-    middleware.insert_after Warden::Manager, SSO::Doorkeeper::GrantMarker
+      app.middleware.insert_after ::Warden::Manager, ::SSO::Doorkeeper::GrantMarker
+     end
 
     config.generators do |g|
       g.test_framework :rspec
