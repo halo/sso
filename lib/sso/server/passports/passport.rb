@@ -5,6 +5,8 @@ module SSO
       class Passport < ActiveRecord::Base
         include ::SSO::Logging
 
+        self.table_name = 'passports'
+
         before_validation :ensure_secret
         before_validation :ensure_group_id
         before_validation :ensure_activity_at

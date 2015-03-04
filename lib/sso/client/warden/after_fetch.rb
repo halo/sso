@@ -1,3 +1,5 @@
+require 'sso/client/omniauth/strategies/sso'
+
 module SSO
   module Client
     module Warden
@@ -11,53 +13,35 @@ module SSO
       class AfterFetch
         include ::SSO::Logging
 
-        attr_reader :user, :warden, :options
+        attr_reader :passport, :warden, :options
 
         def self.activate(options)
-          ::Warden::Manager.after_fetch(options) do |user, warden, options|
-            SSO::Client::Warden::AfterFetch.new(user: user, warden: warden, options: options).call
+          ::Warden::Manager.after_fetch(options) do |passport, warden, options|
+            SSO::Client::Warden::AfterFetch.new(passport: passport, warden: warden, options: options).call
           end
         end
 
-        def initialize(user: user, warden: warden, options: options)
-          @user, @warden, @options = user, warden, options
+        def initialize(passport: passport, warden: warden, options: options)
+          @passport, @warden, @options = passport, warden, options
         end
 
         def call
-          return unless relevant?
+          return unless passport.is_a?(::SSO::Client::Passport)
           verify!
 
         rescue Timeout::Error => exception
           error { 'SSO Server timed out. Continuing with last known authentication/authorization...' }
-          meter status: :timeout, scope: scope, passport_id: user.passport_id, timeout_ms: human_readable_timeout_in_ms
+          #meter status: :timeout, scope: scope, passport_id: user.passport_id, timeout_ms: human_readable_timeout_in_ms
 
         rescue => exception
-          # bugsnag or something
+          # call bugsnag or something without halting the flow. the show must go on!
           raise
         end
 
         private
 
-        def relevant?
-          user_supports_passports? && user_has_passport?
-        end
-
-        def user_supports_passports?
-          return true if user.respond_to?(:passport_id)
-          debug { "The User object in this scope (#{warden_scope.inspect}) does not support Passports. I will not verify any Passports for now." }
-          meter status: :unsupported, scope: scope
-          false
-        end
-
-        def user_has_passport?
-          return true if user.passport_id.present?
-          warn { 'It seems that your session was not created with the most recent code base. I will not verify any Passport for now.' }
-          meter status: :missing, scope: scope
-          false
-        end
-
         def verify!
-          debug { "Validating Passport #{user.passport_id.inspect} of logged in #{user.class} in scope #{warden_scope.inspect}" }
+          debug { "Validating Passport #{passport.id.inspect} of logged in #{passport.user.class} in scope #{warden_scope.inspect}" }
 
           case response.code
           when 201 then valid_passport_changed!
@@ -105,21 +89,24 @@ module SSO
 
         # Needs to be configurable
         def path
-          '/api/v1/passports/verify'
+          OmniAuth::Strategies::SSO.passports_path
+        end
+
+        def base_endpoint
+          OmniAuth::Strategies::SSO.endpoint
         end
 
         def meter(*args)
           # This will be a hook for e.g. statistics, benchmarking, etc, measure everything
         end
 
-        def base_endpoint
-          # Could simply be derived from: OmniAuth::Strategies::SSO.endpoint
-          # Depends on your use case I guess
-          SSO::Test.endpoint
-        end
 
         def ip
           warden.request.ip
+        end
+
+        def agent
+          warden.request.user_agent
         end
 
         def warden_scope
@@ -127,11 +114,11 @@ module SSO
         end
 
         def params
-          { ip: ip, agent: warden.request.user_agent, state: user.state }
+          { ip: ip, agent: agent, state: passport.state }
         end
 
         def token
-          Signature::Token.new user.passport_id, user.passport_secret
+          Signature::Token.new passport.id, passport.secret
         end
 
         def signature_request

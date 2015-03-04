@@ -3,12 +3,7 @@ module SSO
     isolate_namespace SSO
 
     initializer "my_engine.add_middleware" do |app|
-      app.middleware.insert_after ::ActionDispatch::Flash, ::Warden::Manager do |manager|
-        manager.failure_app = ::SSO::Warden::FailureApp
-        manager.intercept_401 = false
-      end
-
-      app.middleware.insert_after ::Warden::Manager, ::SSO::Doorkeeper::GrantMarker
+      app.middleware.insert_after ::Warden::Manager, ::SSO::Server::Doorkeeper::GrantMarker
      end
 
     config.generators do |g|

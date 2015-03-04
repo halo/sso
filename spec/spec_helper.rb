@@ -1,9 +1,11 @@
 ENV['RACK_ENV'] = 'test'
 
 require File.expand_path('../dummy/config/environment', __FILE__)
+
 require 'rspec/rails'
 require 'database_cleaner'
 require 'timecop'
+require 'webmock'
 
 Dir[Pathname.pwd.join('spec/support/**/*.rb')].each { |f| require f }
 
