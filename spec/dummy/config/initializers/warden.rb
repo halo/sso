@@ -24,4 +24,8 @@
 end
 
 # POI
-Warden::Manager.after_authentication &::SSO::Server::Warden::AfterAuthentication.to_proc
+Warden::Manager.after_authentication &::SSO::Server::Warden::Hooks::AfterAuthentication.()
+Warden::Strategies.add :password, ::SSO::Server::Warden::Strategies::Passport
+
+#Warden::Strategies.add :password do
+#end

@@ -3,6 +3,7 @@ module SSO
     isolate_namespace SSO
 
     initializer "my_engine.add_middleware" do |app|
+      app.middleware.insert_after ::Warden::Manager, ::SSO::Server::Middleware::PassportVerification
       app.middleware.insert_after ::Warden::Manager, ::SSO::Server::Doorkeeper::GrantMarker
      end
 
