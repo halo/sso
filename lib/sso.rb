@@ -6,14 +6,21 @@ require 'signature'
 require 'warden'
 
 require 'sso/logging'
+
 require 'sso/client/passport'
 require 'sso/client/warden/after_fetch'
-require 'sso/server/doorkeeper/resource_owner_from_credentials'
+
+require 'sso/server/warden/after_authentication'
 require 'sso/server/doorkeeper/resource_owner_authenticator'
 require 'sso/server/doorkeeper/grant_marker'
+require 'sso/server/errors'
 require 'sso/server/passports'
 require 'sso/server/passports/passport'
 require 'sso/server/geolocations'
 require 'sso/server/configuration'
 require 'sso/server/configure'
 require 'sso/server/engine'
+
+module SSO
+  extend ::SSO::Logging
+end

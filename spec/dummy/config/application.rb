@@ -12,6 +12,8 @@ module Dummy
   class Application < Rails::Application
     config.active_record.raise_in_transactional_callbacks = true
 
+    config.log_formatter = Proc.new { |severity, datetime, progname, message| "\e[34m#{progname || 'Rails'}\e[0m : #{message}\n" }
+
     # POI
     config.middleware.insert_after ::ActionDispatch::Flash, ::Warden::Manager do |manager|
       manager.failure_app = SessionsController.action :new
