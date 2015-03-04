@@ -2,15 +2,19 @@ module SSO
   module Logging
 
     def debug(&block)
-      logger.debug self.class.name, &block
+      logger.debug progname, &block
     end
 
     def info(&block)
-      logger.info self.class.name, &block
+      logger.info progname, &block
     end
 
     def warn(&block)
-      logger.warn self.class.name, &block
+      logger.warn progname, &block
+    end
+
+    def progname
+      self.class.name == 'Module' ? self.name : self.class.name
     end
 
     def logger

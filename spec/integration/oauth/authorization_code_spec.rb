@@ -14,7 +14,11 @@ RSpec.describe 'OAuth 2.0 Authorization Grant Flow', type: :request, db: true, c
     expect(session[:return_path]).to eq "/oauth/authorize?#{grant_params.to_query}"
   end
 
-  context 'Authorization Grant Request' do
+  it 'shows to the login page' do
+    expect(response).to render_template 'sessions/new'
+  end
+
+  context 'Logging in' do
     before do
       post '/sessions', username: 'carol', password: 'p4ssword'
       follow_redirect!
@@ -29,7 +33,7 @@ RSpec.describe 'OAuth 2.0 Authorization Grant Flow', type: :request, db: true, c
       expect(latest_passport.oauth_access_grant_id).to eq latest_grant.id
     end
 
-    context 'Authorization Grant <-> Access Token exchange' do
+    context 'Exchanging the Authorization Grant for an Access Token' do
       let(:grant_token)     { ::Rack::Utils.parse_query(URI.parse(response.location).query).fetch('code') }
       let(:exchange_params) { { client_id: alpha_id, client_secret: alpha_secret, code: grant_token, grant_type: :authorization_code, redirect_uri: alpha_redirect_uri } }
       let(:access_token)    { JSON.parse(response.body).fetch 'access_token' }

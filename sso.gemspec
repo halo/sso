@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'doorkeeper'
   s.add_dependency 'httparty'
   s.add_dependency 'omniauth-oauth2'
+  s.add_dependency 'operation'
   s.add_dependency 'signature'
   s.add_dependency 'warden'
 

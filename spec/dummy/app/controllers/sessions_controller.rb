@@ -1,11 +1,13 @@
 class SessionsController < ApplicationController
 
+  # POI
   def new
     return_path = env['warden.options'][:attempted_path]
     Rails.logger.debug { "Remembering the return path #{return_path.inspect}"}
     session[:return_path] = return_path
   end
 
+  # POI
   def create
     warden.authenticate! :password
 

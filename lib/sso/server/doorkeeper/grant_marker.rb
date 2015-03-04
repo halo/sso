@@ -5,7 +5,6 @@ module SSO
         include ::SSO::Logging
 
         def initialize(app)
-          debug { 'Initializing...' }
           @app = app
         end
 
@@ -13,13 +12,11 @@ module SSO
           @env = env
           @response = @app.call @env
 
-          debug { 'ping' }
-
           return response unless outgoing_grant_token
 
           if passport_id
             debug { %{Detected outgoing "Authorization Grant Token" #{outgoing_grant_token.inspect} of the "Authorization Code Grant" flow. Augmenting Passport #{passport_id.inspect} with it.} }
-            registration = ::Passports.register_authorization_grant passport_id: passport_id, token: outgoing_grant_token
+            registration = ::SSO::Server::Passports.register_authorization_grant passport_id: passport_id, token: outgoing_grant_token
 
             if registration.failure?
               warn { "The passport could not be augmented. Destroying warden session." }
@@ -56,7 +53,7 @@ module SSO
 
         def location_header
           unless code == 302
-            debug { "Uninteresting response, because it is not a redirect" }
+            # debug { "Uninteresting response, because it is not a redirect" }
             return
           end
 
@@ -65,7 +62,7 @@ module SSO
 
         def redirect_uri
           unless location_header
-            debug { "Uninteresting response, because there is no Location header" }
+            # debug { "Uninteresting response, because there is no Location header" }
             return
           end
 
@@ -79,7 +76,7 @@ module SSO
 
         def outgoing_grant_token
           unless redirect_uri_params && redirect_uri_params['code']
-            debug { "Uninteresting response, because there is no code parameter sent" }
+            # debug { "Uninteresting response, because there is no code parameter sent" }
             return
           end
 

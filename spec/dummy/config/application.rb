@@ -12,6 +12,7 @@ module Dummy
   class Application < Rails::Application
     config.active_record.raise_in_transactional_callbacks = true
 
+    # POI
     config.middleware.insert_after ::ActionDispatch::Flash, ::Warden::Manager do |manager|
       manager.failure_app = SessionsController.action :new
       manager.intercept_401 = false
