@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/halo/sso.svg?branch=master)](https://travis-ci.org/halo/sso)
+[![License](http://img.shields.io/badge/license-MIT-blue.svg)](http://github.com/halo/sso/blob/master/LICENSE.md)
 [![Join the chat at https://gitter.im/halo/sso](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/halo/sso)
 
 The purpose of this gem is to do [this](https://github.com/halo/oauth-sso/blob/master/flow.pdf).
