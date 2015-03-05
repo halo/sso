@@ -5,11 +5,12 @@ require 'operation'
 require 'signature'
 require 'warden'
 
-require 'sso/logging'
 
+require 'sso/client/omniauth/strategies/sso'
+require 'json'
+require 'sso/logging'
 require 'sso/client/passport'
 require 'sso/client/warden/hooks/after_fetch'
-
 require 'sso/server/authentications/passport'
 require 'sso/server/warden/hooks/after_authentication'
 require 'sso/server/warden/strategies/passport'

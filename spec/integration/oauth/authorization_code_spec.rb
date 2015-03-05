@@ -4,7 +4,7 @@ RSpec.describe 'OAuth 2.0 Authorization Grant Flow', type: :request, db: true, c
 
   let(:grant_params)    { { client_id: alpha_id, redirect_uri: alpha_redirect_uri, response_type: :code, state: 'some_random_string' } }
   let(:latest_grant)    { Doorkeeper::AccessGrant.last }
-  let(:latest_passport) { SSO::Server::Passports::Passport.last }
+  let(:latest_passport) { SSO::Server::Passport.last }
 
   before do
     get_via_redirect '/oauth/authorize', grant_params

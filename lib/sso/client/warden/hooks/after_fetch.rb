@@ -1,5 +1,3 @@
-require 'sso/client/omniauth/strategies/sso'
-
 module SSO
   module Client
     module Warden
@@ -57,7 +55,7 @@ module SSO
             else                           unexpected_server_response_status!
             end
 
-          rescue JSON::ParseError
+          rescue JSON::ParserError
             error { 'SSO Server response is not valid JSON.' }
             error { response.inspect }
           end
