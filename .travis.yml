@@ -1,6 +1,7 @@
 language: ruby
 rvm: 2.1.1
 cache: bundler
+sudo: false
 
 before_script:
   - psql -c 'create database sso_test' -U postgres

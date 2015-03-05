@@ -43,3 +43,10 @@ The code is already in use in production but needs to be extracted into this gem
 ### Also good to know
 
 * If the passport verification request times out (like 100ms), the authentication/authorization of the previous request is assumed to still be valid.
+
+# Development
+
+Requirements:
+
+* Ruby 2.1.0 (I think that's demanded for optionsl method keywords)
+* PostgresQL (There are uuid and inet column types for the Passport)
