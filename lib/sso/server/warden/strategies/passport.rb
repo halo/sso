@@ -17,4 +17,3 @@ module SSO
     end
   end
 end
-

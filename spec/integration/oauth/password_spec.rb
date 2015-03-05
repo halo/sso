@@ -7,6 +7,7 @@ RSpec.describe 'OAuth 2.0 Resource Owner Password Credentials Grant', type: :req
   let(:params)   { { grant_type: :password, client_id: alpha_id, client_secret: alpha_secret, username: username, password: password } }
   let(:headers)  { { 'HTTP_ACCEPT' => 'application/json' } }
 
+  let(:latest_passport) { SSO::Server::Passports::Passport.last }
   let(:latest_access_token) { Doorkeeper::AccessToken.last }
   let(:result)              { JSON.parse(response.body) }
 
@@ -25,6 +26,14 @@ RSpec.describe 'OAuth 2.0 Resource Owner Password Credentials Grant', type: :req
 
     it 'includes the access_token' do
       expect(result['access_token']).to eq latest_access_token.token
+    end
+
+    it 'generates a passport with the grant token attached to it' do
+      expect(latest_passport.oauth_access_token_id).to eq latest_access_token.id
+    end
+
+    it 'does not generate multiple passpords' do
+      expect(::SSO::Server::Passports::Passport.count).to eq 1
     end
   end
 

@@ -27,7 +27,7 @@ module SSO
 
             generation = SSO::Server::Passports.generate attributes
             if generation.success?
-              debug { "Passport with ID #{generation.object.inspect} generated successfuly." }
+              debug { "Passport with ID #{generation.object.inspect} generated successfuly. Persisting it in session..." }
               session[:passport_id] = generation.object
             else
               fail generation.code.inspect + generation.object.inspect

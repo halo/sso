@@ -73,7 +73,7 @@ module SSO
           end
 
           def did_not_reach_server!
-            error { 'SSO Server responded with an unexpected HTTP status code.' }
+            error { "SSO Server responded with an unexpected HTTP status code (#{response.code.inspect} instead of 200)." }
           end
 
           def unexpected_server_response!

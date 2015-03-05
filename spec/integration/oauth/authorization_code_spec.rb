@@ -26,7 +26,7 @@ RSpec.describe 'OAuth 2.0 Authorization Grant Flow', type: :request, db: true, c
 
     it 'redirects to the application callback including the Grant Token' do
       expect(latest_grant).to be_present
-      expect(response).to redirect_to "https://alpha.example.com/auth/gate/callback?code=#{latest_grant.token}&state=some_random_string"
+      expect(response).to redirect_to "https://alpha.example.com/auth/sso/callback?code=#{latest_grant.token}&state=some_random_string"
     end
 
     it 'generates a passport with the grant token attached to it' do

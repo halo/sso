@@ -15,7 +15,7 @@ module Doorkeeper
     end
 
     def self.alpha_redirect_uri
-      'https://alpha.example.com/auth/gate/callback'
+      'https://alpha.example.com/auth/sso/callback'
     end
 
     def self.beta_id
@@ -27,7 +27,7 @@ module Doorkeeper
     end
 
     def self.beta_redirect_uri
-      'https://beta.example.com/cms/auth/gate/callback'
+      'https://beta.example.com/cms/auth/sso/callback'
     end
 
   end

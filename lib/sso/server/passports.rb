@@ -29,6 +29,31 @@ module SSO
         end
       end
 
+      def self.register_access_token_from_grant(grant_token:, access_token:)
+        access_grant = find_valid_access_grant(grant_token)             { |failure| return failure }
+        access_token = find_valid_access_token(access_token)            { |failure| return failure }
+        record       = find_valid_passport_by_grant_id(access_grant.id) { |failure| return failure }
+
+        if record.update_attribute :oauth_access_token_id, access_token.id
+          debug { "Successfully augmented Passport #{record.id} with Access Token ID #{access_token.id} which is #{access_token.token}" }
+          Operations.success :passport_known_by_grant_augmented_with_access_token
+        else
+          Operations.failure :could_not_augment_passport_known_by_grant_with_access_token
+        end
+      end
+
+      def self.register_access_token(passport_id:, access_token:)
+        access_token = find_valid_access_token(access_token) { |failure| return failure }
+        record       = find_valid_passport(passport_id)      { |failure| return failure }
+
+        if record.update_attribute :oauth_access_token_id, access_token.id
+          debug { "Successfully augmented Passport #{record.id} with Access Token ID #{access_token.id} which is #{access_token.token}" }
+          Operations.success :passport_augmented_with_access_token
+        else
+          Operations.failure :could_not_augment_passport_with_access_token
+        end
+      end
+
       private
 
       def self.find_valid_passport(id, &block)
@@ -42,6 +67,16 @@ module SSO
         end
       end
 
+      def self.find_valid_passport_by_grant_id(id, &block)
+        if record = backend.where(revoked_at: nil).find_by_oauth_access_grant_id(id)
+          record
+        else
+          warn { "Could not find valid passport by Authorization Grant ID #{id.inspect}" }
+          yield Operations.failure :passport_not_found
+          nil
+        end
+      end
+
       def self.find_valid_access_grant(token, &block)
         record = ::Doorkeeper::AccessGrant.find_by_token token
 
@@ -50,6 +85,18 @@ module SSO
         else
           warn { "Could not find valid Authorization Grant Token #{token.inspect}" }
           yield Operations.failure :access_grant_not_found
+          nil
+        end
+      end
+
+      def self.find_valid_access_token(token, &block)
+        record = ::Doorkeeper::AccessToken.find_by_token token
+
+        if record && record.valid?
+          record
+        else
+          warn { "Could not find valid OAuth Access Token #{token.inspect}" }
+          yield Operations.failure :access_token_not_found
           nil
         end
       end
