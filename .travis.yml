@@ -4,8 +4,8 @@ cache: bundler
 sudo: false
 
 before_script:
-  - bundle exec rake app:db:create
-  - bundle exec rake app:db:migrate
+  - rake db:create
+  - rake db:migrate
 
 script:
-  - bundle exec rspec spec
+  - bundle exec rspec
