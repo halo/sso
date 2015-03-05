@@ -12,7 +12,17 @@ module Dummy
   class Application < Rails::Application
     config.active_record.raise_in_transactional_callbacks = true
 
-    config.log_formatter = Proc.new { |severity, datetime, progname, message| "\e[34m#{progname || 'Rails'}\e[0m : #{message}\n" }
+    config.log_formatter = Proc.new do |severity, datetime, progname, message|
+      severity = case severity
+      when 'ERROR' then "\e[#31mERROR\e[0m"
+      when 'WARN'  then "\e[#33mWARN \e[0m"
+      when 'INFO'  then "\e[#32mINFO \e[0m"
+      when 'DEBUG' then "\e[#35mDEBUG\e[0m"
+      else              severity
+      end
+
+      "#{severity.ljust 5} \e[34m#{progname || 'Rails'}\e[0m : #{message}\n"
+    end
 
     # POI
     config.middleware.insert_after ::ActionDispatch::Flash, ::Warden::Manager do |manager|

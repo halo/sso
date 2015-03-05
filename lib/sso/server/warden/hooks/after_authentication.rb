@@ -9,7 +9,12 @@ module SSO
 
           def self.call
             Proc.new do |user, warden, options|
-              new(user: user, warden: warden, options: options).call
+              begin
+                new(user: user, warden: warden, options: options).call
+              rescue => exception
+                ::SSO.config.logger.error(self.class) { "An internal error occured #{exception.class.name} #{exception.message} #{exception.backtrace[0..5].join(' ') rescue nil}" }
+                # The show must co on
+              end
             end
           end
 

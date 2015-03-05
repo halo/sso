@@ -43,15 +43,31 @@ module SSO
 
           def verify!
             debug { "Validating Passport #{passport.id.inspect} of logged in #{passport.user.class} in scope #{warden_scope.inspect}" }
-            return did_not_reach_server!       unless response.code == 200
-            return unexpected_server_response! unless response.parsed_response && response.parsed_response.success && response.parsed_response.success.to_s != 'true'
+            return server_unreachable!                   unless response.code == 200
+            return server_response_not_parseable!        unless parsed_response
+            return server_response_missing_success_flag! unless response_has_success_flag?
+            return server_response_unsuccessful!         unless parsed_response['success'].to_s == 'true'
 
-            case response.parsed_response.code
+            code = parsed_response['code'].to_s == '' ? :unknown_response_code : parsed_response['code'].to_s.to_sym
+
+            case code
             when :passport_changed    then valid_passport_changed!
             when :passpord_unmodified then valid_passport_remains!
             when :passport_invalid    then invalid_passport!
             else                           unexpected_server_response_status!
             end
+
+          rescue JSON::ParseError
+            error { 'SSO Server response is not valid JSON.' }
+            error { response.inspect }
+          end
+
+          def parsed_response
+            response.parsed_response
+          end
+
+          def response_has_success_flag?
+            parsed_response && parsed_response.respond_to?(:key?) && parsed_response.key?('success')
           end
 
           def valid_passport_changed!
@@ -72,16 +88,20 @@ module SSO
             #meter status: :invalid, passport_id: user.passport_id
           end
 
-          def did_not_reach_server!
+          def server_unreachable!
             error { "SSO Server responded with an unexpected HTTP status code (#{response.code.inspect} instead of 200)." }
           end
 
-          def unexpected_server_response!
+          def server_response_missing_success_flag!
             error { 'SSO Server response did not include the expected success flag.' }
           end
 
           def unexpected_server_response_status!
             error { 'SSO Server response did not include a known passport status code.' }
+          end
+
+          def server_response_not_parseable!
+            error { 'SSO Server response could not be parsed at all.' }
           end
 
           def endpoint

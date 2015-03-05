@@ -4,6 +4,17 @@ module SSO
     module Passports
       extend ::SSO::Logging
 
+      def self.find(id)
+        if record = backend.find_by_id(id)
+          Operation.success :record_found, object: record
+        else
+          Operations.failure :record_not_found
+        end
+
+      rescue => exception
+        Operations.failure :backend_error, object: exception
+      end
+
       def self.generate(owner_id:, ip:, agent:)
         debug { "Generating Passport for user ID #{owner_id.inspect} and IP #{ip.inspect} and Agent #{agent.inspect}" }
 
@@ -102,7 +113,7 @@ module SSO
       end
 
       def self.backend
-        ::SSO::Server::Passports::Passport
+        ::SSO::Server::Passport
       end
 
     end
