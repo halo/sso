@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe SSO::Client::Warden::AfterFetch, type: :request do
+RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request do
 
   # Client side
   let(:ip)              { '198.51.100.74' }
@@ -18,7 +18,7 @@ RSpec.describe SSO::Client::Warden::AfterFetch, type: :request do
   let(:passport_secret) { 'xyz' }
 
   # Server side
-  let(:server_user)     { ::User.find_by_id 42 }
+  let(:server_user)      { ::User.find_by_id 42 }
   let!(:server_passport) { ::SSO::Server::Passports::Passport.create! owner_id: server_user.id, group_id: SecureRandom.uuid, ip: '198.51.100.1', agent: 'Google Chrome', application_id: 99 }
 
   context 'no changes' do

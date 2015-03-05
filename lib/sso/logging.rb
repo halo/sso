@@ -13,6 +13,10 @@ module SSO
       logger.warn progname, &block
     end
 
+    def error(&block)
+      logger.error progname, &block
+    end
+
     def progname
       self.class.name == 'Module' ? self.name : self.class.name
     end

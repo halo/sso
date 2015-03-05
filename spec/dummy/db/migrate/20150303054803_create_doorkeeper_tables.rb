@@ -1,3 +1,5 @@
+# POI
+
 class CreateDoorkeeperTables < ActiveRecord::Migration
   def change
     create_table :oauth_applications do |t|

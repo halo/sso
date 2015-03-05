@@ -18,6 +18,7 @@ class SessionsController < ApplicationController
       redirect_to session[:return_path]
       session[:return_path] = nil
     else
+      debug { "I don't know where you came from, sending you to #{root_url}" }
       redirect_to root_url
     end
   end

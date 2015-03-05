@@ -5,7 +5,7 @@ module SSO
         class Passport < ::Warden::Strategies::Base
 
           def valid?
-            fail 'bom'
+            params['auth_version'].to_s != '' && params['state'] != ''
           end
 
           def authenticate!

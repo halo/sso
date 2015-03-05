@@ -8,7 +8,7 @@ require 'warden'
 require 'sso/logging'
 
 require 'sso/client/passport'
-require 'sso/client/warden/after_fetch'
+require 'sso/client/warden/hooks/after_fetch'
 
 require 'sso/server/warden/hooks/after_authentication'
 require 'sso/server/warden/strategies/passport'

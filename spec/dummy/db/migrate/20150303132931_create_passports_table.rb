@@ -1,3 +1,5 @@
+# POT
+
 class CreatePassportsTable < ActiveRecord::Migration
   # TODO: Right now this requires Postgres
   def change

@@ -5,15 +5,15 @@
   end
 
   def authenticate!
-    Rails.logger.debug 'Authenticating from username and password...'
+    Rails.logger.debug(progname) { 'Authenticating from username and password...' }
 
     user = ::User.authenticate params['username'], params['password']
 
     if user
-      Rails.logger.debug { 'Authentication from username and password successful.' }
+      Rails.logger.debug(progname) { 'Authentication from username and password successful.' }
       success! user
     else
-      Rails.logger.debug { 'Authentication from username and password failed.' }
+      Rails.logger.debug(progname) { 'Authentication from username and password failed.' }
       fail! 'Could not login.'
     end
   end
@@ -25,7 +25,7 @@ end
 
 # POI
 Warden::Manager.after_authentication &::SSO::Server::Warden::Hooks::AfterAuthentication.()
-Warden::Strategies.add :password, ::SSO::Server::Warden::Strategies::Passport
+Warden::Strategies.add :passport, ::SSO::Server::Warden::Strategies::Passport
 
 #Warden::Strategies.add :password do
 #end

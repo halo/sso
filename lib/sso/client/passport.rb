@@ -8,7 +8,7 @@ module SSO
         @id, @secret, @state, @user = id, secret, state, user
       end
 
-      def verify!
+      def verified!
         verified = true
       end
 
