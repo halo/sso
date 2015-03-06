@@ -1,3 +1,5 @@
+# POI
+
 ::Doorkeeper.configure do
 
   orm :active_record
