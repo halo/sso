@@ -16,10 +16,10 @@ RSpec.configure do |config|
   config.include FactoryGirl::Syntax::Methods
   config.include SSO::Test::Helpers
 
-  config.raise_errors_for_deprecations!
-  config.disable_monkey_patching!
   config.color = true
+  config.disable_monkey_patching!
   config.fail_fast = true
+  config.raise_errors_for_deprecations!
   config.use_transactional_fixtures = false
 
   config.before :suite do
@@ -27,14 +27,14 @@ RSpec.configure do |config|
     DatabaseCleaner.clean_with :truncation
   end
 
-  config.before :each do
-    redirect_httparty_to_rails_stack
-    DatabaseCleaner.start
-  end
-
-  config.after :each do
-    DatabaseCleaner.clean
-    Timecop.return
-  end
+  #config.before :each do
+  #  redirect_httparty_to_rails_stack
+  #  DatabaseCleaner.start
+  #end
+  #
+  #config.after :each do
+  #  DatabaseCleaner.clean
+  #  Timecop.return
+  #end
 
 end
