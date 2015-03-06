@@ -1,5 +1,8 @@
 ENV['RACK_ENV'] = 'test'
 
+require 'simplecov'
+SimpleCov.start
+
 require 'sso'
 require 'sso/server'  # <- The dummy app is an SSO Server
 require 'sso/client'  # <- For integration tests from client to server
