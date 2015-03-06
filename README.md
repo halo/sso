@@ -1,4 +1,4 @@
-[![Gem Version](http://https://img.shields.io/gem/v/sso.svg)](https://rubygems.org/gems/sso)
+[![Gem Version](https://img.shields.io/gem/v/sso.svg)](https://rubygems.org/gems/sso)
 [![Build Status](https://travis-ci.org/halo/sso.svg?branch=master)](https://travis-ci.org/halo/sso)
 [![License](http://img.shields.io/badge/license-MIT-blue.svg)](http://github.com/halo/sso/blob/master/LICENSE.md)
 [![Join the chat at https://gitter.im/halo/sso](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/halo/sso)
