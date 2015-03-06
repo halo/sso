@@ -1,3 +1,9 @@
+require 'rails'
+require 'doorkeeper'
+require 'sso'
+require 'sso/server'
+require 'sso/client'
+
 require File.expand_path('../config/application', __FILE__)
 
 Rails.application.load_tasks
