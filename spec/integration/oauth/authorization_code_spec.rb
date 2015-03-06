@@ -2,7 +2,10 @@ require 'spec_helper'
 
 RSpec.describe 'OAuth 2.0 Authorization Grant Flow', type: :request, db: true, create_employees: true do
 
-  let(:grant_params)    { { client_id: alpha_client_id, redirect_uri: alpha_redirect_uri, response_type: :code, scope: :insider, state: 'some_random_string' } }
+  let!(:user)    { create :user }
+  let!(:client)  { create :unscoped_doorkeeper_application }
+
+  let(:grant_params)    { { client_id: client.uid, redirect_uri: client.redirect_uri, response_type: :code, scope: :insider, state: 'some_random_string' } }
   let(:latest_grant)    { Doorkeeper::AccessGrant.last }
   let(:latest_passport) { SSO::Server::Passport.last }
 
@@ -20,13 +23,13 @@ RSpec.describe 'OAuth 2.0 Authorization Grant Flow', type: :request, db: true, c
 
   context 'Logging in' do
     before do
-      post '/sessions', username: 'carol', password: 'p4ssword'
+      post '/sessions', username: user.email, password: user.password
       follow_redirect!
     end
 
     it 'redirects to the application callback including the Grant Token' do
       expect(latest_grant).to be_present
-      expect(response).to redirect_to "https://alpha.example.com/auth/sso/callback?code=#{latest_grant.token}&state=some_random_string"
+      expect(response).to redirect_to "#{client.redirect_uri}?code=#{latest_grant.token}&state=some_random_string"
     end
 
     it 'generates a passport with the grant token attached to it' do
@@ -35,7 +38,7 @@ RSpec.describe 'OAuth 2.0 Authorization Grant Flow', type: :request, db: true, c
 
     context 'Exchanging the Authorization Grant for an Access Token' do
       let(:grant_token)     { ::Rack::Utils.parse_query(URI.parse(response.location).query).fetch('code') }
-      let(:exchange_params) { { client_id: alpha_client_id, client_secret: alpha_secret, code: grant_token, grant_type: :authorization_code, redirect_uri: alpha_redirect_uri } }
+      let(:exchange_params) { { client_id: client.uid, client_secret: client.secret, code: grant_token, grant_type: :authorization_code, redirect_uri: client.redirect_uri } }
       let(:access_token)    { JSON.parse(response.body).fetch 'access_token' }
 
       before do

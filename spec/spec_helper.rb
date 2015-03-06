@@ -1,8 +1,10 @@
 ENV['RACK_ENV'] = 'test'
 
 require File.expand_path('../dummy/config/environment', __FILE__)
+ActiveRecord::Migration.maintain_test_schema!
 
 require 'rspec/rails'
+require 'factory_girl_rails'
 require 'database_cleaner'
 require 'timecop'
 require 'webmock'
@@ -11,7 +13,7 @@ Dir[Pathname.pwd.join('spec/support/**/*.rb')].each { |f| require f }
 
 RSpec.configure do |config|
 
-  config.include Doorkeeper::Test::Helpers
+  config.include FactoryGirl::Syntax::Methods
   config.include SSO::Test::Helpers
 
   config.raise_errors_for_deprecations!
@@ -28,7 +30,6 @@ RSpec.configure do |config|
   config.before :each do
     redirect_httparty_to_rails_stack
     DatabaseCleaner.start
-    Doorkeeper::Test.setup
   end
 
   config.after :each do

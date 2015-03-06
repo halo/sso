@@ -7,6 +7,8 @@ module OmniAuth
       def self.endpoint
         if ENV['OMNIAUTH_SSO_ENDPOINT'].to_s != ''
           ENV['OMNIAUTH_SSO_ENDPOINT'].to_s
+        elsif defined?(Rails) && Rails.env.development?
+          ENV['OMNIAUTH_SSO_ENDPOINT'] || 'http://sso.dev:8080'
         elsif defined?(Rails) && Rails.env.test?
           #  ▼ Within this repository        ▼ Within other repositories that don't have SSO::Test
           ::SSO::Test.endpoint rescue 'https://sso.example.com'

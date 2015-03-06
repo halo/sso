@@ -89,12 +89,13 @@ module SSO
         end
 
         def update_passport
+          debug { "Will update activity of Passport #{passport.id} if neccesary..." }
           if passport.ip.to_s == ip.to_s && passport.agent.to_s == user_agent.to_s
-            # For some reason we never get here so we update it all all the time right now.
+            debug { "No changes in IP or User Agent so I won't perform an update now..." }
             Operations.success :already_up_to_date
           else
-            debug { "Updating activity of Passport #{passport.id}" }
-            passport.update_attributes ip: ip, agent: user_agent, activity_at: Time.now
+            debug { "Yes, it is necessary, updating activity of Passport #{passport.id}" }
+            passport.update_attributes ip: ip.to_s, agent: user_agent, activity_at: Time.now
             Operations.success :passport_metadata_updated
           end
         end
@@ -116,7 +117,7 @@ module SSO
           if insider?
             params['ip']
           else
-            request.remote_ip
+            request_ip
           end
         end
 
@@ -126,6 +127,10 @@ module SSO
           else
             request.user_agent
           end
+        end
+
+        def request_ip
+          request.env['action_dispatch.remote_ip'] || fail("Whoops, I thought you were using Rails, but action_dispatch.remote_ip is empty!")
         end
 
         def verb

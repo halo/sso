@@ -51,8 +51,8 @@ ActiveRecord::Schema.define(version: 20150303132931) do
     t.string   "secret",                    null: false
     t.text     "redirect_uri",              null: false
     t.string   "scopes",       default: "", null: false
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
   end
 
   add_index "oauth_applications", ["uid"], name: "index_oauth_applications_on_uid", unique: true, using: :btree
@@ -83,5 +83,15 @@ ActiveRecord::Schema.define(version: 20150303132931) do
   add_index "passports", ["owner_id"], name: "index_passports_on_owner_id", using: :btree
   add_index "passports", ["revoke_reason"], name: "index_passports_on_revoke_reason", using: :btree
   add_index "passports", ["secret"], name: "index_passports_on_secret", using: :btree
+
+  create_table "users", force: :cascade do |t|
+    t.string   "name",                    null: false
+    t.string   "email",                   null: false
+    t.string   "password",                null: false
+    t.string   "tags",       default: [],              array: true
+    t.boolean  "vip"
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
+  end
 
 end

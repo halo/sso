@@ -22,6 +22,7 @@ module SSO
       attr_accessor :user
 
       def export
+        debug { "Exporting Passport #{self.id} including the encapsulated user." }
         {
           id: id,
           secret: secret,

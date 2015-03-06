@@ -1,7 +1,38 @@
-test:
-  endpoint: 127.0.0.1
+<%
+
+endpoint = ENV['SSO_DB_ENDPOINT']
+database = ENV['SSO_DB_DATABASE']
+username = ENV['SSO_DB_USERNAME']
+password = ENV['SSO_DB_PASSWORD']
+
+if Rails.env.development? && RbConfig::CONFIG['target_vendor'] == 'apple'
+  endpoint ||= '127.0.0.1'
+  database ||= 'sso_development'
+  username ||= ''
+  password ||= ''
+  sslmode  = 'disable'
+
+elsif Rails.env.test?
+  endpoint ||= '127.0.0.1'
+  database ||= 'sso_test'
+  username ||= ''
+  password ||= ''
+  sslmode  = 'disable'
+end
+
+raise 'You must set SSO_DB_ENDPOINT' unless endpoint.present?
+raise 'You must set SSO_DB_DATABASE' unless database.present?
+raise 'You must set SSO_DB_USERNAME' unless username
+raise 'You must set SSO_DB_PASSWORD' unless password
+
+%>
+
+<%= Rails.env %>:
   adapter: postgresql
-  database: sso_test
+  host:     <%= endpoint %>
+  database: <%= database %>
+  username: <%= username %>
+  password: <%= password %>
   encoding: unicode
   port: 5432
-  sslmode: disable
+  sslmode:  <%= sslmode %>

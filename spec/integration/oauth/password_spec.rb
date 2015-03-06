@@ -1,11 +1,13 @@
 require 'spec_helper'
 
-RSpec.describe 'OAuth 2.0 Resource Owner Password Credentials Grant', type: :request, db: true, create_customers: true do
+RSpec.describe 'OAuth 2.0 Resource Owner Password Credentials Grant', type: :request do
 
-  let(:username) { 'carol' }
-  let(:password) { 'p4ssword' }
-  let(:params)   { { grant_type: :password, client_id: alpha_client_id, client_secret: alpha_secret, username: username, password: password } }
-  let(:headers)  { { 'HTTP_ACCEPT' => 'application/json' } }
+  let!(:user)    { create :user }
+  let!(:client)  { create :unscoped_doorkeeper_application }
+
+  let(:params_password) { user.password }
+  let(:params)          { { grant_type: :password, client_id: client.uid, client_secret: client.secret, username: user.email, password: params_password } }
+  let(:headers)         { { 'HTTP_ACCEPT' => 'application/json' } }
 
   let(:latest_passport)     { ::SSO::Server::Passport.last }
   let(:passport_count)      { ::SSO::Server::Passport.count }
@@ -39,7 +41,7 @@ RSpec.describe 'OAuth 2.0 Resource Owner Password Credentials Grant', type: :req
   end
 
   context 'wrong password' do
-    let(:password) { 'wrong-password-sent-by-hackerz' }
+    let(:params_password) { 'wrong-password-sent-by-hackerz' }
 
     it 'fails' do
       expect(response.status).to eq 401
