@@ -6,7 +6,7 @@ module SSO
       app.middleware.insert_after ::Warden::Manager, ::SSO::Server::Middleware::PassportVerification
       app.middleware.insert_after ::Warden::Manager, ::SSO::Server::Doorkeeper::GrantMarker
       app.middleware.insert_after ::Warden::Manager, ::SSO::Server::Doorkeeper::AccessTokenMarker
-     end
+    end
 
     config.generators do |g|
       g.test_framework :rspec

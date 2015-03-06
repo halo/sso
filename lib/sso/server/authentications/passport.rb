@@ -25,19 +25,14 @@ module SSO
         attr_reader :request
 
         def authenticate!
-          return Operations.failure :missing_verb          if verb.blank?
-          return Operations.failure :missing_passport_id   if passport_id.blank?
-          return Operations.failure :missing_state         if state.blank?
-          return Operations.failure :passport_not_found    if passport.blank?
-          return Operations.failure :passport_revoked      if passport.invalid?
-          # return Operations.failure :user_not_encapsulated if passport.user.blank?
+          check_arguments { |failure| return failure }
 
           unless valid_signature?
-            warn { "I found the corresponding passport, but the request was not properly signed with it." }
+            warn { 'I found the corresponding passport, but the request was not properly signed with it.' }
             return Operations.failure :invalid_signature, object: failure_rack_array
           end
 
-          debug { "The request was properly signed, I found the corresponding passport." }
+          debug { 'The request was properly signed, I found the corresponding passport.' }
           update_passport
 
           if passport.state == state
@@ -46,6 +41,16 @@ module SSO
             debug { "The current user state #{passport.state.inspect} does not match the provided state #{state.inspect}" }
             Operations.success :signature_approved_state_changed, object: success_new_state_rack_array
           end
+        end
+
+        def check_arguments
+          yield Operations.failure :missing_verb         if verb.blank?
+          yield Operations.failure :missing_passport_id  if passport_id.blank?
+          yield Operations.failure :missing_state        if state.blank?
+          yield Operations.failure :passport_not_found   if passport.blank?
+          yield Operations.failure :passport_revoked     if passport.invalid?
+          # yield Operations.failure :user_not_encapsulated if passport.user.blank?
+          Operations.success :arguments_are_valid
         end
 
         def success_new_state_rack_array
@@ -79,8 +84,10 @@ module SSO
         end
 
         def valid_signature?
-          !!signature_request.authenticate { Signature::Token.new passport_id, passport.secret }
-        rescue Signature::AuthenticationError => exception
+          signature_request.authenticate { Signature::Token.new passport_id, passport.secret }
+          true
+        rescue Signature::AuthenticationError
+          debug { 'It looks like the API signature for the passport verification was incorrect.' }
           false
         end
 
@@ -100,13 +107,17 @@ module SSO
           end
         end
 
+        def application
+          passport.application
+        end
+
         def app_scopes
-          passport.application.scopes
+          application.scopes
         end
 
         def insider?
           if app_scopes.empty?
-            warn { "Doorkeeper::Application #{passport.application.name} with ID #{passport.application.id} has no scope restrictions. Assuming 'outsider' for now." }
+            warn { "Doorkeeper::Application #{application.name} with ID #{application.id} has no scope restrictions. Assuming 'outsider' for now." }
             return false
           end
 
@@ -130,7 +141,7 @@ module SSO
         end
 
         def request_ip
-          request.env['action_dispatch.remote_ip'] || fail("Whoops, I thought you were using Rails, but action_dispatch.remote_ip is empty!")
+          request.env['action_dispatch.remote_ip'] || fail('Whoops, I thought you were using Rails, but action_dispatch.remote_ip is empty!')
         end
 
         def verb

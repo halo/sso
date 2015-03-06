@@ -1,11 +1,12 @@
 require 'spec_helper'
 
-RSpec.describe 'OAuth 2.0 Authorization Grant Flow', type: :request, db: true, create_employees: true do
+RSpec.describe 'OAuth 2.0 Authorization Grant Flow', type: :request, db: true do
 
-  let!(:user)    { create :user }
-  let!(:client)  { create :unscoped_doorkeeper_application }
+  let!(:user)        { create :user }
+  let!(:client)      { create :unscoped_doorkeeper_application }
+  let(:redirect_uri) { client.redirect_uri }
 
-  let(:grant_params)    { { client_id: client.uid, redirect_uri: client.redirect_uri, response_type: :code, scope: :insider, state: 'some_random_string' } }
+  let(:grant_params)    { { client_id: client.uid, redirect_uri: redirect_uri, response_type: :code, scope: :insider, state: 'some_random_string' } }
   let(:latest_grant)    { Doorkeeper::AccessGrant.last }
   let(:latest_passport) { SSO::Server::Passport.last }
 
@@ -37,12 +38,13 @@ RSpec.describe 'OAuth 2.0 Authorization Grant Flow', type: :request, db: true, c
     end
 
     context 'Exchanging the Authorization Grant for an Access Token' do
-      let(:grant_token)     { ::Rack::Utils.parse_query(URI.parse(response.location).query).fetch('code') }
-      let(:exchange_params) { { client_id: client.uid, client_secret: client.secret, code: grant_token, grant_type: :authorization_code, redirect_uri: client.redirect_uri } }
-      let(:access_token)    { JSON.parse(response.body).fetch 'access_token' }
+      let(:grant)        { ::Rack::Utils.parse_query(URI.parse(response.location).query).fetch('code') }
+      let(:grant_type)   { :authorization_code }
+      let(:params)       { { client_id: client.uid, client_secret: client.secret, code: grant, grant_type: grant_type, redirect_uri: redirect_uri } }
+      let(:access_token) { JSON.parse(response.body).fetch 'access_token' }
 
       before do
-        post '/oauth/token', exchange_params
+        post '/oauth/token', params
       end
 
       it 'gets the access token' do

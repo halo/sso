@@ -29,8 +29,7 @@ module SSO
             end
 
           rescue => exception
-            error { "An internal error occured #{exception.class.name} #{exception.message} #{exception.backtrace[0..5].join(' ') rescue nil}" }
-            # The show must co on
+            ::SSO.config.exception_handler.call exception
           end
 
         end

@@ -1,7 +1,10 @@
 ENV['RACK_ENV'] = 'test'
 
+require 'sso'
+require 'sso/server'  # <- The dummy app is an SSO Server
+require 'sso/client'  # <- For integration tests from client to server
+
 require File.expand_path('../dummy/config/environment', __FILE__)
-ActiveRecord::Migration.maintain_test_schema!
 
 require 'rspec/rails'
 require 'factory_girl_rails'
@@ -29,12 +32,18 @@ RSpec.configure do |config|
 
   config.before :each do
     redirect_httparty_to_rails_stack
+  end
+
+  config.before :each, db: true do
     DatabaseCleaner.start
   end
 
   config.after :each do
-    DatabaseCleaner.clean
     Timecop.return
+  end
+
+  config.after :each, db: true do
+    DatabaseCleaner.clean
   end
 
 end

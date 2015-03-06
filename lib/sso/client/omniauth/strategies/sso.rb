@@ -7,14 +7,21 @@ module OmniAuth
       def self.endpoint
         if ENV['OMNIAUTH_SSO_ENDPOINT'].to_s != ''
           ENV['OMNIAUTH_SSO_ENDPOINT'].to_s
-        elsif defined?(Rails) && Rails.env.development?
+        elsif development_environment?
           ENV['OMNIAUTH_SSO_ENDPOINT'] || 'http://sso.dev:8080'
-        elsif defined?(Rails) && Rails.env.test?
-          #  ▼ Within this repository        ▼ Within other repositories that don't have SSO::Test
-          ::SSO::Test.endpoint rescue 'https://sso.example.com'
+        elsif test_environment?
+          'https://sso.example.com'
         else
           fail 'You must set OMNIAUTH_SSO_ENDPOINT to point to the SSO OAuth server'
         end
+      end
+
+      def self.development_environment?
+        defined?(Rails) && Rails.env.development?
+      end
+
+      def self.test_environment?
+        defined?(Rails) && Rails.env.test? || ENV['RACK_ENV'] == 'test'
       end
 
       def self.passports_path

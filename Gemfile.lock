@@ -88,6 +88,9 @@ GEM
       guard (~> 2.1)
       guard-compat (~> 1.1)
       rspec (>= 2.99.0, < 4.0)
+    guard-rubocop (1.2.0)
+      guard (~> 2.0)
+      rubocop (~> 0.20)
     hashie (3.4.0)
     hike (1.2.3)
     hitimes (1.2.2)
@@ -235,7 +238,8 @@ PLATFORMS
 DEPENDENCIES
   database_cleaner
   factory_girl_rails
-  guard-rspec
+  guard-rspec (>= 4.2.3)
+  guard-rubocop
   pg
   rails
   rspec-rails

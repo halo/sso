@@ -1,7 +1,10 @@
-# POT
+# POI
+
+# This is what the Passport table on the SSO Server looks like. You need to have this migration.
+# As you can see it uses the `uuid` and `inet` column types. So you are kind of stuck with Postgres.
+# However, there should be no reason for you not to simply use `integer` and `string` for those two columns instead.
 
 class CreatePassportsTable < ActiveRecord::Migration
-  # TODO: Right now this requires Postgres
   def change
     enable_extension 'uuid-ossp'
 

@@ -7,12 +7,12 @@ module SSO
 
           attr_reader :user, :warden, :options
 
-          def self.call
-            Proc.new do |user, warden, options|
+          def self.to_proc
+            proc do |user, warden, options|
               begin
                 new(user: user, warden: warden, options: options).call
               rescue => exception
-                ::SSO.config.logger.error(self.class) { "An internal error occured #{exception.class.name} #{exception.message} #{exception.backtrace[0..5].join(' ') rescue nil}" }
+                ::SSO.config.exception_handler.call exception
                 # The show must co on
               end
             end

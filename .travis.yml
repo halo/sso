@@ -8,4 +8,4 @@ before_script:
   - bundle exec rake db:migrate
 
 script:
-  - bundle exec rspec
+  - bundle exec rspec && bundle exec rubocop

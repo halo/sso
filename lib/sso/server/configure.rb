@@ -8,7 +8,7 @@ module SSO
 
   # Public: Yields the configuration instance.
   #
-  def self.configure(&block)
+  def self.configure
     yield config
   end
 

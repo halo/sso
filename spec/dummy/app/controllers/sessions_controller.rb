@@ -1,11 +1,13 @@
 class SessionsController < ApplicationController
   include ::SSO::Logging
+  delegate :logout, to: :warden
+
+  before_action :not_json, only: [:new]
 
   # POI
   def new
-    render status: :unauthorized, json: { status: :error, code: :authentication_failed } and return if request.format == :json
     return_path = env['warden.options'][:attempted_path]
-    debug { "Remembering the return path #{return_path.inspect}"}
+    debug { "Remembering the return path #{return_path.inspect}" }
     session[:return_path] = return_path
   end
 
@@ -23,11 +25,12 @@ class SessionsController < ApplicationController
     end
   end
 
-  def logout
-    warden.logout
-  end
-
   private
+
+  def not_json
+    return unless request.format == :json
+    render status: :unauthorized, json: { status: :error, code: :authentication_failed }
+  end
 
   def warden
     request.env['warden']

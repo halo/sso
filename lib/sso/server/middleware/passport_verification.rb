@@ -12,7 +12,7 @@ module SSO
           request = Rack::Request.new(env)
 
           if request.get? && request.path == passports_path
-            debug { "Detected incoming Passport verification request." }
+            debug { 'Detected incoming Passport verification request.' }
             env['warden'].authenticate! :passport
           else
             debug { "I'm not interested in this request to #{request.path}" }

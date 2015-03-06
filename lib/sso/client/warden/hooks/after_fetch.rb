@@ -11,41 +11,48 @@ module SSO
         #
         class AfterFetch
           include ::SSO::Logging
+          include ::SSO::Benchmarking
 
           attr_reader :passport, :warden, :options
 
-          def self.activate(options)
-            ::Warden::Manager.after_fetch(options) do |passport, warden, options|
+          def self.activate(warden_options)
+            ::Warden::Manager.after_fetch(warden_options) do |passport, warden, options|
               ::SSO::Client::Warden::Hooks::AfterFetch.new(passport: passport, warden: warden, options: options).call
             end
           end
 
-          def initialize(passport: passport, warden: warden, options: options)
+          def initialize(passport:, warden:, options:)
             @passport, @warden, @options = passport, warden, options
           end
 
           def call
             return unless passport.is_a?(::SSO::Client::Passport)
-            verify!
+            verify
 
-          rescue Timeout::Error => exception
+          rescue Timeout::Error
             error { 'SSO Server timed out. Continuing with last known authentication/authorization...' }
-            #meter status: :timeout, scope: scope, passport_id: user.passport_id, timeout_ms: human_readable_timeout_in_ms
+            # meter status: :timeout, scope: scope, passport_id: user.passport_id, timeout_ms: human_readable_timeout_in_ms
 
           rescue => exception
-            # call bugsnag or something without halting the flow. the show must go on!
-            raise
+            ::SSO.config.exception_handler.call exception
           end
 
           private
 
-          def verify!
+          def verify
             debug { "Validating Passport #{passport.id.inspect} of logged in #{passport.user.class} in scope #{warden_scope.inspect}" }
             return server_unreachable!                   unless response.code == 200
             return server_response_not_parseable!        unless parsed_response
             return server_response_missing_success_flag! unless response_has_success_flag?
             return server_response_unsuccessful!         unless parsed_response['success'].to_s == 'true'
+            verify!
 
+          rescue JSON::ParserError
+            error { 'SSO Server response is not valid JSON.' }
+            error { response.inspect }
+          end
+
+          def verify!
             code = parsed_response['code'].to_s == '' ? :unknown_response_code : parsed_response['code'].to_s.to_sym
 
             case code
@@ -54,10 +61,6 @@ module SSO
             when :passport_invalid    then invalid_passport!
             else                           unexpected_server_response_status!
             end
-
-          rescue JSON::ParserError
-            error { 'SSO Server response is not valid JSON.' }
-            error { response.inspect }
           end
 
           def parsed_response
@@ -71,19 +74,19 @@ module SSO
           def valid_passport_changed!
             debug { 'Valid passport, but state changed' }
             passport.verified!
-            #meter status: :valid, passport_id: user.passport_id
+            # meter status: :valid, passport_id: user.passport_id
           end
 
           def valid_passport_remains!
             debug { 'Valid passport, no changes' }
             user.verified!
-            #meter status: :valid, passport_id: user.passport_id
+            # meter status: :valid, passport_id: user.passport_id
           end
 
           def invalid_passport!
             info { 'Your Passport is not valid any more.' }
             warden.logout warden_scope
-            #meter status: :invalid, passport_id: user.passport_id
+            # meter status: :invalid, passport_id: user.passport_id
           end
 
           def server_unreachable!
@@ -119,10 +122,9 @@ module SSO
             OmniAuth::Strategies::SSO.endpoint
           end
 
-          def meter(*args)
+          def meter(*_)
             # This will be a hook for e.g. statistics, benchmarking, etc, measure everything
           end
-
 
           def ip
             warden.request.ip
@@ -165,12 +167,9 @@ module SSO
           end
 
           def response!
-            result = nil
-            seconds = Benchmark.realtime {
-              result = ::HTTParty.get endpoint, timeout: timeout_in_seconds, query: query_params, headers: { 'Accept' => 'application/json' }
-            }
-            info { "Passport authorization request took #{(seconds * 1000).round}ms" }
-            result
+            benchmark 'Passport authorization request' do
+              ::HTTParty.get endpoint, timeout: timeout_in_seconds, query: query_params, headers: { 'Accept' => 'application/json' }
+            end
           end
 
         end

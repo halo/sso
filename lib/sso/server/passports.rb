@@ -5,8 +5,10 @@ module SSO
       extend ::SSO::Logging
 
       def self.find(id)
-        if record = backend.find_by_id(id)
-          Operation.success :record_found, object: record
+        record = backend.find_by_id(id)
+
+        if record
+          Operation.success(:record_found, object: record)
         else
           Operations.failure :record_not_found
         end
@@ -65,30 +67,43 @@ module SSO
         end
       end
 
+      def self.logout(passport_id:, provider_passport_id:)
+        if passport_id.present? || provider_passport_id.present?
+          debug { "Attemting to logout Passport groups of Passport IDs #{passport_id.inspect} and #{provider_passport_id.inspect}..." }
+        else
+          debug { "Should logout Passport groups now, but don't know which ones. Moving on..." }
+          return Operations.success :nothing_to_revoke_from
+        end
+
+        count = 0
+        count += logout_cluster(passport_id) if passport_id.present?
+        count += logout_cluster(provider_passport_id) if provider_passport_id.present?
+
+        Operations.success :passports_revoked, object: count
+      end
+
       private
 
-      def self.find_valid_passport(id, &block)
-        if record = backend.where(revoked_at: nil).find_by_id(id)
-          record
-        else
-          debug { "Could not find valid passport with ID #{id.inspect}" }
-          debug { "All I have is #{backend.all.inspect}" }
-          yield Operations.failure :passport_not_found if block_given?
-          nil
-        end
+      def self.find_valid_passport(id)
+        record = backend.where(revoked_at: nil).find_by_id(id)
+        return record if record
+
+        debug { "Could not find valid passport with ID #{id.inspect}" }
+        debug { "All I have is #{backend.all.inspect}" }
+        yield Operations.failure :passport_not_found if block_given?
+        nil
       end
 
-      def self.find_valid_passport_by_grant_id(id, &block)
-        if record = backend.where(revoked_at: nil).find_by_oauth_access_grant_id(id)
-          record
-        else
-          warn { "Could not find valid passport by Authorization Grant ID #{id.inspect}" }
-          yield Operations.failure :passport_not_found
-          nil
-        end
+      def self.find_valid_passport_by_grant_id(id)
+        record = backend.where(revoked_at: nil).find_by_oauth_access_grant_id(id)
+        return record if record
+
+        warn { "Could not find valid passport by Authorization Grant ID #{id.inspect}" }
+        yield Operations.failure :passport_not_found
+        nil
       end
 
-      def self.find_valid_access_grant(token, &block)
+      def self.find_valid_access_grant(token)
         record = ::Doorkeeper::AccessGrant.find_by_token token
 
         if record && record.valid?
@@ -100,7 +115,7 @@ module SSO
         end
       end
 
-      def self.find_valid_access_token(token, &block)
+      def self.find_valid_access_token(token)
         record = ::Doorkeeper::AccessToken.find_by_token token
 
         if record && record.valid?
@@ -110,6 +125,18 @@ module SSO
           yield Operations.failure :access_token_not_found
           nil
         end
+      end
+
+      def self.logout_cluster(passport_id)
+        unless passport_id.present? && record = backend.find_by_id(passport_id)
+          debug { "Cannot revoke Passport group of Passport ID #{passport_id.inspect} because it does not exist." }
+          return 0
+        end
+
+        debug { "Revoking Passport group #{record.group_id.inspect} of Passport ID #{passport_id.inspect}" }
+        affected_row_count = backend.where(group_id: record.group_id).update_all revoked_at: Time.now, revoke_reason: :logout
+        debug { "Successfully revoked #{affected_row_count.inspect} Passports." }
+        affected_row_count
       end
 
       def self.backend

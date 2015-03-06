@@ -9,20 +9,16 @@ module SSO
       end
 
       def verified!
-        verified = true
+        @verified = true
       end
 
       def verified?
-        !!verified
+        @verified == true
       end
 
       def unverified?
         !verified?
       end
-
-      private
-
-      attr_writer :verified
 
     end
   end

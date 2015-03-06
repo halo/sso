@@ -27,7 +27,7 @@ RSpec.describe SSO::Logging do
   end
 
   context 'logger missing' do
-    let(:logger) { }
+    let(:logger) {}
 
     describe '#debug' do
       it 'does not break' do

@@ -1,3 +1,5 @@
+require 'active_record'
+
 module SSO
   module Server
     # This could be MongoDB or whatever
@@ -22,7 +24,7 @@ module SSO
       attr_accessor :user
 
       def export
-        debug { "Exporting Passport #{self.id} including the encapsulated user." }
+        debug { "Exporting Passport #{id} including the encapsulated user." }
         {
           id: id,
           secret: secret,
@@ -80,8 +82,8 @@ module SSO
       end
 
       def update_location
-        location_name = ::SSO::Server::Geolocations.human_readable_location_for_ip self.ip
-        debug { "Updating geolocation for #{self.ip} which is #{location_name}" }
+        location_name = ::SSO::Server::Geolocations.human_readable_location_for_ip ip
+        debug { "Updating geolocation for #{ip} which is #{location_name}" }
         self.location = location_name
       end
 

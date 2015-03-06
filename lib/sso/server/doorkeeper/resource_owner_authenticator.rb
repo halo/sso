@@ -6,7 +6,7 @@ module SSO
 
         attr_reader :controller
 
-        def self.call
+        def self.to_proc
           proc { ::SSO::Server::Doorkeeper::ResourceOwnerAuthenticator.new(controller: self).call }
         end
 
@@ -25,7 +25,7 @@ module SSO
             debug { "Yes, User with ID #{current_user.inspect} has a session." }
             current_user
           else
-            debug { "No, no User is logged in right now. Initializing authentication procedure..." }
+            debug { 'No, no User is logged in right now. Initializing authentication procedure...' }
             warden.authenticate! :password
           end
         end

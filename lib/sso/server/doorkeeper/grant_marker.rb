@@ -4,6 +4,9 @@ module SSO
       class GrantMarker
         include ::SSO::Logging
 
+        attr_reader :response
+        delegate :session, to: :request
+
         def initialize(app)
           @app = app
         end
@@ -15,11 +18,12 @@ module SSO
           return response unless outgoing_grant_token
 
           if passport_id
-            debug { %{Detected outgoing "Authorization Grant Token" #{outgoing_grant_token.inspect} of the "Authorization Code Grant" flow. Augmenting Passport #{passport_id.inspect} with it.} }
+            debug { %(Detected outgoing "Authorization Grant Token" #{outgoing_grant_token.inspect} of the "Authorization Code Grant" flow.) }
+            debug { %(Augmenting Passport #{passport_id.inspect} with this outgoing Grant Token...) }
             registration = ::SSO::Server::Passports.register_authorization_grant passport_id: passport_id, token: outgoing_grant_token
 
             if registration.failure?
-              warn { "The passport could not be augmented. Destroying warden session." }
+              warn { 'The passport could not be augmented. Destroying warden session.' }
               warden.logout
             end
           end
@@ -31,16 +35,8 @@ module SSO
           ::ActionDispatch::Request.new @env
         end
 
-        def response
-          @response
-        end
-
         def code
           response.first
-        end
-
-        def session
-          request.session
         end
 
         def warden
