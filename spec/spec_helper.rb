@@ -1,7 +1,9 @@
 ENV['RACK_ENV'] = 'test'
 
-require 'simplecov'
-SimpleCov.start
+unless ENV['TRAVIS']
+  require 'simplecov'
+  SimpleCov.start
+end
 
 require 'sso'
 require 'sso/server'  # <- The dummy app is an SSO Server
