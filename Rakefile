@@ -12,5 +12,4 @@ ENV['RAILS_ENV'] = 'test'
 
 # Delegate everything to the dummy
 APP_RAKEFILE = File.expand_path("../spec/dummy/Rakefile", __FILE__)
-
 load 'rails/tasks/engine.rake'
