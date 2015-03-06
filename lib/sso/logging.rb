@@ -1,4 +1,7 @@
 module SSO
+  # One thing tha bugs me is when I cannot see which part of the code caused a log message.
+  # This mixin will include the current class name as Logger `progname` so you can show that it in your logfiles.
+  #
   module Logging
 
     def debug(&block)

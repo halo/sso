@@ -7,7 +7,8 @@ end
 
 Bundler::GemHelper.install_tasks
 
-# I don't see which other environment we should use
+# For your convenience, when you're in the root directory of this repository
+# running `rake` will proxy you to the `spec/dummy` Rakefile using the test environment.
 ENV['RAILS_ENV'] = 'test'
 
 # Delegate everything to the dummy

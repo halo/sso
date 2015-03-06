@@ -62,6 +62,6 @@ Good to know:
 * You can always `git grep POI` to see some points of interest. They will be properly documented as development progresses.
 * You should tail `spec/dummy/log/test.log` because it's really helpful
 
-# Contributing
+### Contributing
 
 * The [CHANGELOG](https://github.com/halo/sso/blob/master/CHANGELOG.md) follows [this](https://github.com/tech-angels/vandamme/#changelogs-convention) format.

@@ -27,14 +27,14 @@ RSpec.configure do |config|
     DatabaseCleaner.clean_with :truncation
   end
 
-  #config.before :each do
-  #  redirect_httparty_to_rails_stack
-  #  DatabaseCleaner.start
-  #end
-  #
-  #config.after :each do
-  #  DatabaseCleaner.clean
-  #  Timecop.return
-  #end
+  config.before :each do
+    redirect_httparty_to_rails_stack
+    DatabaseCleaner.start
+  end
+
+  config.after :each do
+    DatabaseCleaner.clean
+    Timecop.return
+  end
 
 end
