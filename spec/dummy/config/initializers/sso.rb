@@ -1,5 +1,7 @@
 # POI
 
+# This is the minimal configuration you need to do for using the sso gem.
+
 SSO.configure do |config|
 
   config.find_user_for_passport = Proc.new do |passport, ip|
@@ -24,6 +26,9 @@ SSO.configure do |config|
     [user.email, user.password, user.tags.sort].join
   end
 
-  # This is a rather static key. You might want to derive it from the secret_key_base if you want to.
-  config.user_state_key = 'some_random_secret_token'
+  # This is a rather static key used to calculate whether a user state changed and needs to be propagated to the OAuth clients.
+  # It's not a problem if this changes, as long as it's somewhat deterministic.
+  # In our case, we simply derive it from the Rails secret_key_base so we don't have to remember yet another secret somewhere.
+  generator = ActiveSupport::KeyGenerator.new Rails.application.config.secret_key_base, iterations: 1000
+  config.user_state_key = Rails.application.config.user_state_digest_key = generator.generate_key 'user state digest key'
 end
