@@ -44,12 +44,13 @@ The code is already in use in production but needs to be extracted into this gem
 
 Requirements:
 
-* Ruby 2.1.0 (I think that's demanded for optionsl method keywords arguments or whatever they're called)
+* Ruby 2.1.0 (I think that's demanded for optional method keywords arguments or whatever they're called)
 * PostgreSQL running in the background (There are uuid and inet column types for the Passport)
 
 How to run the specs:
 
 ```ruby
+# RAILS_ENV is "test" by default.
 bundle exec rake db:create
 bundle exec rake db:migrate
 bundle exec rspec
@@ -57,4 +58,5 @@ bundle exec rspec
 
 Good to know:
 
-You can always `git grep POI` to see some points of interest. They will be properly documented as development progresses.
+* You can always `git grep POI` to see some points of interest. They will be properly documented as development progresses.
+* You should tail `spec/dummy/log/test.log` because it's really helpful
