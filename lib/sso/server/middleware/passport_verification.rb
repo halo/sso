@@ -9,31 +9,19 @@ module SSO
         end
 
         def call(env)
-          @env = env
+          request = Rack::Request.new(env)
 
-          if applicable?
+          if request.get? && request.path == passports_path
             debug { "Detected incoming Passport verification request." }
-            warden.authenticate! :passport
+            env['warden'].authenticate! :passport
           else
-            debug { "Request uninteresting." }
+            debug { "I'm not interested in this request to #{request.path}" }
             @app.call(env)
           end
         end
 
-        def applicable?
-          request.get? && request.path == passports_path
-        end
-
         def passports_path
           OmniAuth::Strategies::SSO.passports_path
-        end
-
-        def request
-          @request ||= Rack::Request.new(@env)
-        end
-
-        def warden
-          @env['warden']
         end
 
       end

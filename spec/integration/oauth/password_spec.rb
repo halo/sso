@@ -4,7 +4,7 @@ RSpec.describe 'OAuth 2.0 Resource Owner Password Credentials Grant', type: :req
 
   let(:username) { 'carol' }
   let(:password) { 'p4ssword' }
-  let(:params)   { { grant_type: :password, client_id: alpha_id, client_secret: alpha_secret, username: username, password: password } }
+  let(:params)   { { grant_type: :password, client_id: alpha_client_id, client_secret: alpha_secret, username: username, password: password } }
   let(:headers)  { { 'HTTP_ACCEPT' => 'application/json' } }
 
   let(:latest_passport)     { ::SSO::Server::Passport.last }

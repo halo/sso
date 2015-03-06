@@ -19,13 +19,12 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request do
 
   # Server side
   let(:server_user)      { ::User.find_by_id 42 }
-  let!(:server_passport) { ::SSO::Server::Passport.create! user: server_user, owner_id: server_user.id, group_id: SecureRandom.uuid, ip: '198.51.100.1', agent: 'Google Chrome', application_id: 99 }
+  let!(:server_passport) { ::SSO::Server::Passport.create! user: server_user, owner_id: server_user.id, group_id: SecureRandom.uuid, ip: '198.51.100.1', agent: 'Google Chrome', application_id: alpha_id }
 
   context 'no changes' do
     it 'verifies the user' do
-      #expect(client_passport).to receive(:verified!)
-      # Currently failing
-      #hook.call
+      expect(client_passport).to receive(:verified!)
+      hook.call
     end
   end
 

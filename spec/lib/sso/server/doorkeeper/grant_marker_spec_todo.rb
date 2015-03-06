@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe SSO::Doorkeeper::GrantMarker, type: :request do
 
-  let(:grant_params)    { { client_id: alpha_id, redirect_uri: alpha_redirect_uri, response_type: :code, state: 'some_random_string' } }
+  let(:grant_params)    { { client_id: alpha_client_id, redirect_uri: alpha_redirect_uri, response_type: :code, state: 'some_random_string' } }
   #let(:latest_grant)    { Doorkeeper::AccessGrant.last }
   #let(:latest_passport) { Passports::Backend.last }
 

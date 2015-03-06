@@ -2,11 +2,21 @@ module Doorkeeper
   module Test
 
     def self.setup
-      Doorkeeper::Application.create! name: 'Alpha', redirect_uri: alpha_redirect_uri, uid: alpha_id, secret: alpha_secret
-      Doorkeeper::Application.create! name: 'Beta',  redirect_uri: beta_redirect_uri,  uid: beta_id,  secret: beta_secret
+      @alpha = Doorkeeper::Application.create! name: 'Alpha', redirect_uri: alpha_redirect_uri, uid: alpha_client_id, secret: alpha_secret, scopes: :insider
+      @beta  = Doorkeeper::Application.create! name: 'Beta',  redirect_uri: beta_redirect_uri,  uid: beta_client_id,  secret: beta_secret, scopes: :outsider
     end
 
     def self.alpha_id
+      fail "You need to run #{self.name}.setup before Alpha has an ID." unless @alpha
+      @alpha.id
+    end
+
+    def self.beta_id
+      fail "You need to run #{self.name}.setup before Beta has an ID." unless @beta
+      @beta.id
+    end
+
+    def self.alpha_client_id
       '087e7eba0ab22099a6f8864aefd2472ffba2376ab2ebe090d9917c5d63b9ac45'
     end
 
@@ -18,7 +28,7 @@ module Doorkeeper
       'https://alpha.example.com/auth/sso/callback'
     end
 
-    def self.beta_id
+    def self.beta_client_id
       'afb5b8ff6d708e36c315ede59418cedf57a1f4c8807d9028ac450ddb131cefcd'
     end
 

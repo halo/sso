@@ -4,8 +4,8 @@ module SSO
       class Passport
         include ::SSO::Logging
 
-        def initialize(verb:, path:, params:)
-          @verb, @path, @params = verb, path, params
+        def initialize(request)
+          @request = request
         end
 
         def authenticate
@@ -22,7 +22,7 @@ module SSO
 
         private
 
-        attr_reader :verb, :path, :params
+        attr_reader :request
 
         def authenticate!
           return Operations.failure :missing_verb          if verb.blank?
@@ -49,17 +49,23 @@ module SSO
         end
 
         def success_new_state_rack_array
-          payload = passport.as_json
-          [201, { 'Content-Type' => 'application/json' }, [payload.to_json]]
+          payload = { success: true, code: :passport_changed, passport: passport.export }
+          [200, { 'Content-Type' => 'application/json' }, [payload.to_json]]
         end
 
         def success_same_state_rack_array
-          [204, { 'Content-Type' => 'application/json' }, []]
+          payload = { success: true, code: :passpord_unmodified }
+          [200, { 'Content-Type' => 'application/json' }, [payload.to_json]]
         end
 
+        # You might be wondering why we don't simply return a 401 or 404 status code.
+        # The reason is that the receiving end would have no way to determine whether that reply is due to a
+        # nginx configuration error or because the passport is actually invalid. We don't want to revoke
+        # all passports simply because a load balancer is pointing to the wrong Rails application or something.
+        #
         def failure_rack_array
-          payload = { status: :error, code: :passport_authentication_failed }
-          [401, { 'Content-Type' => 'application/json' }, [payload.to_json]]
+          payload = { success: true, code: :passport_invalid }
+          [200, { 'Content-Type' => 'application/json' }, [payload.to_json]]
         end
 
         def passport
@@ -67,37 +73,71 @@ module SSO
         end
 
         def passport_id
-          request.authenticate { |passport_id| return passport_id }
+          signature_request.authenticate { |passport_id| return passport_id }
         rescue Signature::AuthenticationError
           nil
         end
 
         def valid_signature?
-          !!request.authenticate { Signature::Token.new passport_id, passport.secret }
+          !!signature_request.authenticate { Signature::Token.new passport_id, passport.secret }
         rescue Signature::AuthenticationError => exception
           false
         end
 
-        def request
-          @request ||= Signature::Request.new verb, path, params
+        def signature_request
+          @signature_request ||= Signature::Request.new verb, path, params
         end
 
         def update_passport
-          if passport.ip == ip && passport.agent == user_agent
+          if passport.ip.to_s == ip.to_s && passport.agent.to_s == user_agent.to_s
             # For some reason we never get here so we update it all all the time right now.
             Operations.success :already_up_to_date
           else
             debug { "Updating activity of Passport #{passport.id}" }
             passport.update_attributes ip: ip, agent: user_agent, activity_at: Time.now
+            Operations.success :passport_metadata_updated
           end
         end
 
+        def app_scopes
+          passport.application.scopes
+        end
+
+        def insider?
+          if app_scopes.empty?
+            warn { "Doorkeeper::Application #{passport.application.name} with ID #{passport.application.id} has no scope restrictions. Assuming 'outsider' for now." }
+            return false
+          end
+
+          app_scopes.has_scopes? [:insider]
+        end
+
         def ip
-          params['ip']
+          if insider?
+            params['ip']
+          else
+            request.remote_ip
+          end
         end
 
         def user_agent
-          params['user_agent']
+          if insider?
+            params['user_agent']
+          else
+            request.user_agent
+          end
+        end
+
+        def verb
+          request.request_method
+        end
+
+        def path
+          request.path
+        end
+
+        def params
+          request.params
         end
 
         def state

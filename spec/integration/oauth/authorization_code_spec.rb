@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe 'OAuth 2.0 Authorization Grant Flow', type: :request, db: true, create_employees: true do
 
-  let(:grant_params)    { { client_id: alpha_id, redirect_uri: alpha_redirect_uri, response_type: :code, state: 'some_random_string' } }
+  let(:grant_params)    { { client_id: alpha_client_id, redirect_uri: alpha_redirect_uri, response_type: :code, scope: :insider, state: 'some_random_string' } }
   let(:latest_grant)    { Doorkeeper::AccessGrant.last }
   let(:latest_passport) { SSO::Server::Passport.last }
 
@@ -35,7 +35,7 @@ RSpec.describe 'OAuth 2.0 Authorization Grant Flow', type: :request, db: true, c
 
     context 'Exchanging the Authorization Grant for an Access Token' do
       let(:grant_token)     { ::Rack::Utils.parse_query(URI.parse(response.location).query).fetch('code') }
-      let(:exchange_params) { { client_id: alpha_id, client_secret: alpha_secret, code: grant_token, grant_type: :authorization_code, redirect_uri: alpha_redirect_uri } }
+      let(:exchange_params) { { client_id: alpha_client_id, client_secret: alpha_secret, code: grant_token, grant_type: :authorization_code, redirect_uri: alpha_redirect_uri } }
       let(:access_token)    { JSON.parse(response.body).fetch 'access_token' }
 
       before do

@@ -12,11 +12,9 @@ module SSO
           def authenticate!
             debug { 'Authenticating from Passport...' }
 
-            attributes     = { verb: request.request_method, path: request.path, params: request.params }
             authentication = nil
-
             time = Benchmark.realtime do
-              authentication = ::SSO::Server::Authentications::Passport.new(attributes).authenticate
+              authentication = ::SSO::Server::Authentications::Passport.new(request).authenticate
             end
 
             info { "The Passport verification took #{(time * 1000).round}ms" }

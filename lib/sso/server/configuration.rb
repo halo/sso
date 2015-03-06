@@ -7,8 +7,15 @@ module SSO
       @user_state_base || fail('You need to configure user_state_base, see SSO::Configuration for more info.')
     end
 
-    # TODO check for sanity, it should be a block or something.
+    # TODO check for sanity, it should be a Proc.
     attr_writer :user_state_base
+
+    def find_user_for_passport
+      @find_user_for_passport || fail('You need to configure find_user_for_passport, see SSO::Configuration for more info.')
+    end
+
+    # TODO check for sanity, it should be a Proc.
+    attr_writer :find_user_for_passport
 
     def user_state_key
       @user_state_key || fail('You need to configure a secret user_state_key, see SSO::Configuration for more info.')

@@ -14,6 +14,7 @@ module Dummy
 
     config.log_formatter = Proc.new do |severity, datetime, progname, message|
       severity = case severity
+      when 'FATAL' then "\e[#31mFATAL\e[0m"
       when 'ERROR' then "\e[#31mERROR\e[0m"
       when 'WARN'  then "\e[#33mWARN \e[0m"
       when 'INFO'  then "\e[#32mINFO \e[0m"

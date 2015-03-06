@@ -21,15 +21,28 @@ module SSO
 
       attr_accessor :user
 
+      def export
+        {
+          id: id,
+          secret: secret,
+          user: user,
+        }
+      end
+
       def to_s
         ['Passport', owner_id, ip, activity_at].join ', '
       end
 
       def state
-        unless user
+        if user
+          @state ||= state!
+        else
           warn { 'Wait a minute, this Passport is not encapsulating a user!' }
-          return 'missing_user'
+          'missing_user_for_state_calculation'
         end
+      end
+
+      def state!
         result = nil
         time = Benchmark.realtime do
           result = OpenSSL::HMAC.hexdigest user_state_digest, user_state_key, user_state_base
