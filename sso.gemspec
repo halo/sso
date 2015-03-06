@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://github.com/halo/oauth-sso/issues/1'
   s.test_files  = Dir['spec/**/*'] & `git ls-files -z`.split("\0")
 
-  s.add_dependency 'doorkeeper'
+  s.add_dependency 'doorkeeper', '>= 2.0.0'
   s.add_dependency 'httparty'
   s.add_dependency 'omniauth-oauth2'
   s.add_dependency 'operation'

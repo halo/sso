@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     sso (0.0.2)
-      doorkeeper
+      doorkeeper (>= 2.0.0)
       httparty
       omniauth-oauth2
       operation

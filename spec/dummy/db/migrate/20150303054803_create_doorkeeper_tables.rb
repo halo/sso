@@ -1,5 +1,12 @@
 # POI
 
+# This migration file is created when you run `rails generate doorkeeper:install` in your OAuth Server Rails app.
+# These tables are needed for Doorkeeper to work, see also https://github.com/doorkeeper-gem/doorkeeper#installation
+# This migration here has *not* been modified. You simply see the original file below, created by the Doorkeeper generator.
+
+# Note, however, that it was generated with Doorkeeper >= 2.0.0, since it has the `scopes` column on the `oauth_applications` table.
+# We make use of that column and it was introduced here: https://github.com/doorkeeper-gem/doorkeeper/blob/master/CHANGELOG.md#200
+
 class CreateDoorkeeperTables < ActiveRecord::Migration
   def change
     create_table :oauth_applications do |t|
@@ -7,7 +14,7 @@ class CreateDoorkeeperTables < ActiveRecord::Migration
       t.string  :uid,          null: false
       t.string  :secret,       null: false
       t.text    :redirect_uri, null: false
-      t.string  :scopes,       null: false, default: ''
+      t.string  :scopes,       null: false, default: ''   # <- Exists only with Doorkeeper 2.0.0 or higher.
       t.timestamps
     end
 
