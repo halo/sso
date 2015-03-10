@@ -3,6 +3,7 @@
 /.bundle
 coverage/*
 !coverage/.gitkeep
+!coverage/README.md
 
 /spec/dummy/log/*.log
 /spec/dummy/log/*.age
