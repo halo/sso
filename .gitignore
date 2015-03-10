@@ -1,7 +1,8 @@
 .DS_Store
 *.gem
 /.bundle
-coverage
+coverage/*
+!coverage/.gitkeep
 
 /spec/dummy/log/*.log
 /spec/dummy/log/*.age
