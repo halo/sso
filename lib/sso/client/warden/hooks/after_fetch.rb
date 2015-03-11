@@ -126,7 +126,7 @@ module SSO
             # This will be a hook for e.g. statistics, benchmarking, etc, measure everything
           end
 
-          # TODO: Use ActionDispatch remote IP or you might get the Load Balancer's IP instead :(
+          # TODO Use ActionDispatch remote IP or you might get the Load Balancer's IP instead :(
           def ip
             warden.request.ip
           end

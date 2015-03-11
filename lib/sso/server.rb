@@ -6,6 +6,7 @@ require 'omniauth'
 require 'signature'
 require 'warden'
 
+require 'sso'
 require 'sso/server/errors'
 require 'sso/server/passport'
 require 'sso/server/passports'
