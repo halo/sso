@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
 
   s.files       = Dir['lib/sso/**/*'] & `git ls-files -z`.split("\0")
   s.homepage    = 'https://github.com/halo/sso'
+  s.test_files  = Dir['spec/**/*'] & `git ls-files -z`.split("\0")
 
   # Server (if you only need the client, I'm sorry in advance for installing these unnecessary gems :)
   s.add_runtime_dependency 'doorkeeper', '>= 2.0.0'
