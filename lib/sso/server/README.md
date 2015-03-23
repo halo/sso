@@ -10,4 +10,37 @@
 
 ### Setup
 
-For now, see [these point of interests](https://github.com/halo/sso/search?q=POI) to see how exactly a rails app can be setup.
+For now, see [these point of interests](https://github.com/halo/sso/search?q=POI) to see how exactly a rails app can be setup. Other than that, I'll try to give you an overview here.
+
+First, you'll need to make sure you're using the Warden Rack middleware.
+It's entirely up to you to configure that, but it will probably look something like this if you're using Rails:
+
+```ruby
+# config/application.rb
+config.middleware.insert_after ::ActionDispatch::Flash, '::Warden::Manager' do |manager|
+  manager.failure_app = SessionsController.action :new
+  manager.intercept_401 = false
+
+  manager.serialize_into_session(&:id)
+  manager.serialize_from_session { |id| User.find_by_id(id) }
+end
+```
+
+Next, you might want to use the middleware provided by this gem.
+They won't be loaded automatically, so you have to pick the ones you choose to use.
+
+```ruby
+# config/application.rb
+
+# These two augment passports with the related outgoing access tokens
+config.middleware.insert_after ::Warden::Manager, ::SSO::Server::Doorkeeper::AccessTokenMarker
+config.middleware.insert_after ::Warden::Manager, ::SSO::Server::Doorkeeper::GrantMarker
+
+# This one responds to incoming passport verification requests.
+config.middleware.insert_after ::Warden::Manager, ::SSO::Server::Middleware::PassportVerification
+
+# This is a little more experimental at the moment,
+# Provided an Access Token, you can create Passports.
+# This is most likely needed if you use the iPhone client.
+config.middleware.insert_after ::Warden::Manager, ::SSO::Server::Middleware::PassportCreation
+```

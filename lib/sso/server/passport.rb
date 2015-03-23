@@ -28,6 +28,7 @@ module SSO
         {
           id: id,
           secret: secret,
+          state: state,
           user: user,
         }
       end

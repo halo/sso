@@ -13,7 +13,7 @@ module SSO
                 new(user: user, warden: warden, options: options).call
               rescue => exception
                 ::SSO.config.exception_handler.call exception
-                # The show must co on
+                # The show must go on
               end
             end
           end

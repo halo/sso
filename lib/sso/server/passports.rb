@@ -8,7 +8,7 @@ module SSO
         record = backend.find_by_id(id)
 
         if record
-          Operation.success(:record_found, object: record)
+          Operations.success(:record_found, object: record)
         else
           Operations.failure :record_not_found
         end
