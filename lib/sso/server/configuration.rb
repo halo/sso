@@ -28,6 +28,11 @@ module SSO
     end
     attr_writer :user_state_key
 
+    def passport_chip_key
+      @passport_chip_key || fail('You need to configure a secret passport_chip_key, see SSO::Configuration for more info.')
+    end
+    attr_writer :passport_chip_key
+
     def logger
       @logger ||= default_logger
     end

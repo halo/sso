@@ -41,6 +41,8 @@ module SSO
           passport = finding.object
           debug { "Attaching user to passport #{passport.inspect}" }
           passport.user = SSO.config.find_user_for_passport.call(passport: passport, ip: remote_ip)
+          passport.create_chip!
+
           payload = { success: true, code: :here_is_your_passport, passport: passport.export }
           debug { "Created Passport #{passport.id}, sending it including user #{passport.user.inspect}}"}
 

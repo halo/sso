@@ -22,6 +22,7 @@ module SSO
       validates :application_id, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
       attr_accessor :user
+      attr_reader :chip
 
       def export
         debug { "Exporting Passport #{id} including the encapsulated user." }
@@ -29,6 +30,7 @@ module SSO
           id: id,
           secret: secret,
           state: state,
+          chip: chip,
           user: user,
         }
       end
@@ -56,8 +58,34 @@ module SSO
         result
       end
 
+      def create_chip!
+        ensure_secret
+        cipher = chip_digest
+        cipher.encrypt
+        cipher.key = chip_key
+        chip_iv = cipher.random_iv
+        ciphertext = cipher.update chip_plaintext
+        ciphertext << cipher.final
+        chip = [Base64.encode64(ciphertext).strip(), Base64.encode64(chip_iv).strip()].join('|')
+        logger.debug { "Augmented passport #{id.inspect} with chip #{chip.inspect}" }
+        @chip = chip
+      end
+
       def user_state_digest
         OpenSSL::Digest.new 'sha1'
+      end
+
+      def chip_digest
+        OpenSSL::Cipher::AES256.new :CBC
+      end
+
+      def chip_key
+        SSO.config.passport_chip_key
+      end
+
+      # Don't get confused, the chip plaintext is the passport secret
+      def chip_plaintext
+        secret
       end
 
       def user_state_key
