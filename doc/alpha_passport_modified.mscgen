@@ -2,7 +2,6 @@ msc {
 hscale = "1.3";
 firefox [label="Firefox"],alpha [label="Alpha"],bouncer [label="Bouncer"];
 
-|||;
 firefox => alpha [label="GET /some/resource", linecolor="#4682b4", textcolor="#4682b4"];
 alpha => bouncer [label="sign(GET /oauth/sso/v1/passports/aiaiai)", linecolor="#4682b4", textcolor="#4682b4"];
 alpha <<= bouncer [label="200 - Modified Passport", linecolor="#4682b4", textcolor="#4682b4"];

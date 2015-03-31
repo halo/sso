@@ -4,7 +4,7 @@ iphone [label="iPhone"],bouncer [label="Bouncer"];
 
 iphone => bouncer [label="POST /oauth/token?...", linecolor="#4682b4", textcolor="#4682b4"];
 iphone <<= bouncer [label="201 - Access Token 4t4t4t...", linecolor="#4682b4", textcolor="#4682b4"];
-iphone => bouncer [label="POST /oauth/sso/v1/passports access_token=5t5t5t", linecolor="#4682b4", textcolor="#4682b4"];
+iphone => bouncer [label="POST /oauth/sso/v1/passports?access_token=5t5t5t", linecolor="#4682b4", textcolor="#4682b4"];
 iphone <<= bouncer [label="200 - Passport", linecolor="#4682b4", textcolor="#4682b4"];
 
 }
