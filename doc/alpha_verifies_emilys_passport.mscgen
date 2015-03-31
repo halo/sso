@@ -1,0 +1,8 @@
+msc {
+alpha [label="Alpha"],bouncer [label="Bouncer"];
+
+|||;
+alpha => bouncer [label="sign(GET /oauth/sso/v1/passports/aiaiai)", linecolor="#4682b4", textcolor="#4682b4"];
+alpha <<= bouncer [label="200 - OK", linecolor="#4682b4", textcolor="#4682b4"];
+
+}

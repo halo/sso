@@ -1,0 +1,8 @@
+msc {
+hscale = "1.1";
+alpha [label="Alpha"],bouncer [label="Bouncer"];
+
+alpha => bouncer [label="POST /oauth/sso/v1/passports access_token=2t2t2t", linecolor="#4682b4", textcolor="#4682b4"];
+alpha <<= bouncer [label="200 - Passport", linecolor="#4682b4", textcolor="#4682b4"];
+
+}

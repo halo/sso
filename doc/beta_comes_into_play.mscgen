@@ -1,0 +1,11 @@
+msc {
+hscale = "1.2";
+firefox [label="Firefox"],beta [label="Alpha"],bouncer [label="Bouncer"];
+
+firefox => beta [label="GET /beautiful/resource", linecolor="#4682b4", textcolor="#4682b4"];
+firefox <<= beta [label="302 /oauth/sso", linecolor="#4682b4", textcolor="#4682b4"];
+firefox => beta [label="GET /oauth/sso", linecolor="#4682b4", textcolor="#4682b4"];
+firefox <<= beta [label="302 bouncer.dev/oauth/authorize?...", linecolor="#4682b4", textcolor="#4682b4"];
+firefox => bouncer [label="GET /oauth/authorize?...", linecolor="#4682b4", textcolor="#4682b4"];
+
+}

@@ -1,0 +1,18 @@
+msc {
+hscale = "1.5";
+firefox [label="Firefox"],beta [label="Alpha"],bouncer [label="Bouncer"];
+
+|||;
+firefox <<= bouncer [label="302 alpha.dev/auth/sso/callback?code=2g2g2g...", linecolor="#4682b4", textcolor="#4682b4"];
+firefox => beta [label="GET /auth/sso/callback?code=2g2g2g...", linecolor="#4682b4", textcolor="#4682b4"];
+beta =>> bouncer [label="POST /oauth/token?code=2g2g2g...", linecolor="#4682b4", textcolor="#4682b4"];
+beta <= bouncer [label="201 - Access Token 4t4t4t...", linecolor="#4682b4", textcolor="#4682b4"];
+beta => bouncer [label="POST /oauth/sso/v1/passports access_token=4t4t4t", linecolor="#4682b4", textcolor="#4682b4"];
+beta <<= bouncer [label="200 - Passport", linecolor="#4682b4", textcolor="#4682b4"];
+firefox <<= beta [label="302 /beatutiful/resource", linecolor="#4682b4", textcolor="#4682b4"];
+firefox => beta [label="GET /beatutiful/resource", linecolor="#4682b4", textcolor="#4682b4"];
+beta => bouncer [label="sign(GET /oauth/sso/v1/passports/aiaiai)", linecolor="#4682b4", textcolor="#4682b4"];
+beta <<= bouncer [label="200 - OK", linecolor="#4682b4", textcolor="#4682b4"];
+firefox <<= beta [label="200 - Resource", linecolor="#4682b4", textcolor="#4682b4"];
+
+}

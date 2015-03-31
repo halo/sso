@@ -1,0 +1,8 @@
+msc {
+firefox [label="Firefox"],alpha [label="Alpha"];
+
+firefox <<= alpha [label="302 /oauth/sso", linecolor="#4682b4", textcolor="#4682b4"];
+firefox => alpha [label="GET /oauth/sso", linecolor="#4682b4", textcolor="#4682b4"];
+firefox <<= alpha [label="302 bouncer.dev/oauth/authorize?...", linecolor="#4682b4", textcolor="#4682b4"];
+
+}

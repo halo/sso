@@ -1,0 +1,6 @@
+msc {
+firefox [label="Firefox"],alpha [label="Alpha"];
+
+firefox <<= alpha [label="200 - Resource", linecolor="#4682b4", textcolor="#4682b4"];
+
+}

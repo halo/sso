@@ -1,0 +1,9 @@
+msc {
+hscale = "1.1";
+alpha [label="Alpha"],bouncer [label="Bouncer"];
+
+|||;
+alpha => bouncer [label="sign(GET /oauth/sso/v1/passports/bibibi w/o state)", linecolor="#4682b4", textcolor="#4682b4"];
+alpha <<= bouncer [label="200 - Passport (with user)", linecolor="#4682b4", textcolor="#4682b4"];
+
+}
