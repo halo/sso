@@ -1,0 +1,6 @@
+msc {
+iphone [label="iPhone"],alpha [label="Alpha"];
+
+iphone => alpha [label="sign(GET /cool/resource + state + chip)", linecolor="#4682b4", textcolor="#4682b4"];
+
+}

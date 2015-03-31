@@ -1,0 +1,7 @@
+msc {
+firefox [label="Firefox"],alpha [label="Alpha"];
+
+firefox <<= alpha [label="302 /some/resource", linecolor="#4682b4", textcolor="#4682b4"];
+firefox => alpha [label="GET /some/resource", linecolor="#4682b4", textcolor="#4682b4"];
+
+}

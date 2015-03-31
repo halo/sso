@@ -1,0 +1,8 @@
+msc {
+hscale = "1.2";
+alpha [label="Alpha"],bouncer [label="Bouncer"];
+
+|||;
+alpha <<= bouncer [label="201 - Access Token 2t2t2t...", linecolor="#4682b4", textcolor="#4682b4"];
+
+}

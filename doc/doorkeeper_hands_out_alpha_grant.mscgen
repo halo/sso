@@ -1,0 +1,10 @@
+msc {
+hscale = "1.5";
+firefox [label="Firefox"],alpha [label="Alpha"],bouncer [label="Bouncer"];
+
+|||;
+firefox <<= bouncer [label="302 alpha.dev/auth/sso/callback?code=1g1g1g...", linecolor="#4682b4", textcolor="#4682b4"];
+firefox => alpha [label="GET /auth/sso/callback?code=1g1g1g...", linecolor="#4682b4", textcolor="#4682b4"];
+alpha =>> bouncer [label="POST /oauth/token?code=1g1g1g...", linecolor="#4682b4", textcolor="#4682b4"];
+
+}
