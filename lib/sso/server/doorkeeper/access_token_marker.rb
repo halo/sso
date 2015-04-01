@@ -38,7 +38,7 @@ module SSO
         end
 
         def handle_authorization_grant_flow
-          # We cannot rely on session[:passport_id] here because the end-user might have cookies disabled.
+          # We cannot rely on looking up session[:passport_id] here because the end-user might have cookies disabled.
           # The only thing we can rely on to identify the user/Passport is the incoming grant token.
           debug { %(Detected outgoing "Access Token" #{outgoing_access_token.inspect} of the "Authorization Code Grant" flow) }
           debug { %(This Access Token belongs to "Authorization Grant Token" #{grant_token.inspect}. Augmenting related Passport with it...) }
@@ -50,7 +50,7 @@ module SSO
         end
 
         def handle_password_flow
-          local_passport_id = session[:passport_id] # <- We know this is always set because it was set in this very response
+          local_passport_id = session[:passport_id] # <- We know this always exists because it was set in this very response
           debug { %(Detected outgoing "Access Token" #{outgoing_access_token.inspect} of the "Resource Owner Password Credentials Grant" flow.) }
           debug { %(Augmenting local Passport #{local_passport_id.inspect} with this outgoing Access Token...) }
           generation = ::SSO::Server::Passports.register_access_token passport_id: local_passport_id, access_token: outgoing_access_token

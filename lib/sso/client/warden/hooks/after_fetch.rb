@@ -14,6 +14,7 @@ module SSO
           include ::SSO::Benchmarking
 
           attr_reader :passport, :warden, :options
+          delegate :request, to: :warden
 
           def self.activate(warden_options)
             ::Warden::Manager.after_fetch(warden_options) do |passport, warden, options|
@@ -39,51 +40,47 @@ module SSO
 
           private
 
-          def verify
-            debug { "Validating Passport #{passport.id.inspect} of logged in #{passport.user.class} in scope #{warden_scope.inspect}" }
-            return server_unreachable!                   unless response.code == 200
-            return server_response_not_parseable!        unless parsed_response
-            return server_response_missing_success_flag! unless response_has_success_flag?
-            return server_response_unsuccessful!         unless parsed_response['success'].to_s == 'true'
-            verify!
 
-          rescue JSON::ParserError
-            error { 'SSO Server response is not valid JSON.' }
-            error { response.inspect }
+          def verifier
+            ::SSO::Client::PassportVerifier.new passport_id: passport.id, passport_state: passport.state, passport_secret: passport.secret, user_ip: ip, user_agent: agent, device_id: device_id
           end
 
-          def verify!
-            code = parsed_response['code'].to_s == '' ? :unknown_response_code : parsed_response['code'].to_s.to_sym
+          def verification
+            @verification ||= verifier.call
+          end
 
-            case code
-            when :passport_changed    then valid_passport_changed!
-            when :passpord_unmodified then valid_passport_remains!
-            when :passport_invalid    then invalid_passport!
-            else                           unexpected_server_response_status!
+          def verification_code
+            verification.code
+          end
+
+          def verify
+            debug { "Validating Passport #{passport.id.inspect} of logged in #{passport.user.class} in scope #{warden_scope.inspect}" }
+
+            case verification_code
+            when :server_unreachable                    then server_unreachable!
+            when :server_response_not_parseable         then server_response_not_parseable!
+            when :server_response_missing_success_flag! then server_response_missing_success_flag!
+            when :server_response_unsuccessful!         then server_response_unsuccessful!
+            when :passport_valid                        then passport_valid!
+            when :passport_valid_and_modified           then passport_valid_and_modified!
+            when :passport_invalid                      then passport_invalid!
+            else                                             unexpected_server_response_status!
             end
           end
 
-          def parsed_response
-            response.parsed_response
-          end
-
-          def response_has_success_flag?
-            parsed_response && parsed_response.respond_to?(:key?) && parsed_response.key?('success')
-          end
-
-          def valid_passport_changed!
+          def passport_valid_and_modified!
             debug { 'Valid passport, but state changed' }
             passport.verified!
             # meter status: :valid, passport_id: user.passport_id
           end
 
-          def valid_passport_remains!
+          def passport_valid!
             debug { 'Valid passport, no changes' }
-            user.verified!
+            passport.verified!
             # meter status: :valid, passport_id: user.passport_id
           end
 
-          def invalid_passport!
+          def passport_invalid!
             info { 'Your Passport is not valid any more.' }
             warden.logout warden_scope
             # meter status: :invalid, passport_id: user.passport_id
@@ -98,28 +95,11 @@ module SSO
           end
 
           def unexpected_server_response_status!
-            error { 'SSO Server response did not include a known passport status code.' }
+            error { "SSO Server response did not include a known passport status code. #{verification_code.inspect}" }
           end
 
           def server_response_not_parseable!
             error { 'SSO Server response could not be parsed at all.' }
-          end
-
-          def endpoint
-            URI.join(base_endpoint, path).to_s
-          end
-
-          def query_params
-            params.merge auth_hash
-          end
-
-          # Needs to be configurable
-          def path
-            OmniAuth::Strategies::SSO.passports_path
-          end
-
-          def base_endpoint
-            OmniAuth::Strategies::SSO.endpoint
           end
 
           def meter(*_)
@@ -128,49 +108,19 @@ module SSO
 
           # TODO Use ActionDispatch remote IP or you might get the Load Balancer's IP instead :(
           def ip
-            warden.request.ip
+            request.ip
           end
 
           def agent
-            warden.request.user_agent
+            request.user_agent
+          end
+
+          def device_id
+            request.params['udid']
           end
 
           def warden_scope
             options[:scope]
-          end
-
-          def params
-            { ip: ip, agent: agent, state: passport.state }
-          end
-
-          def token
-            Signature::Token.new passport.id, passport.secret
-          end
-
-          def signature_request
-            Signature::Request.new('GET', path, params)
-          end
-
-          def auth_hash
-            signature_request.sign token
-          end
-
-          def human_readable_timeout_in_ms
-            (timeout_in_seconds * 1000).round
-          end
-
-          def timeout_in_seconds
-            0.1.seconds
-          end
-
-          def response
-            @response ||= response!
-          end
-
-          def response!
-            benchmark 'Passport authorization request' do
-              ::HTTParty.get endpoint, timeout: timeout_in_seconds, query: query_params, headers: { 'Accept' => 'application/json' }
-            end
           end
 
         end

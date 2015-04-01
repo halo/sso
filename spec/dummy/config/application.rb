@@ -32,5 +32,9 @@ module Dummy
       manager.serialize_from_session { |id| User.find_by_id(id) }
     end
 
+    config.middleware.insert_after ::Warden::Manager, ::SSO::Server::Middleware::PassportVerification
+    config.middleware.insert_after ::Warden::Manager, ::SSO::Server::Doorkeeper::GrantMarker
+    config.middleware.insert_after ::Warden::Manager, ::SSO::Server::Doorkeeper::AccessTokenMarker
+
   end
 end

@@ -4,11 +4,11 @@
 
 SSO.configure do |config|
 
-  config.find_user_for_passport = proc do |passport, ip|
+  config.find_user_for_passport = proc do |passport: passport, ip: ip|
     # This is your chance to modify the user instance before it is handed out to the OAuth client apps.
 
     progname = 'SSO.config.find_user_for_passport'
-    Rails.logger.debug(progname) { "Looking up User #{passport.owner_id} belonging to Passport #{passport.id} surfing with IP #{ip}..." }
+    Rails.logger.debug(progname) { "Looking up User #{passport.owner_id.inspect} belonging to Passport #{passport.id.inspect} surfing with IP #{ip.inspect}..." }
     user = User.find_by_id passport.owner_id
     return unless user
 
@@ -26,7 +26,7 @@ SSO.configure do |config|
   config.user_state_base = proc do |user|
     # Include the end-user credentials to force all OAuth client apps to refetch the end-user Passports.
     # This way you can revoke all relevant Passports on SSO-logout and the OAuth client apps are immediately aware of it.
-    [user.email, user.password, user.tags.sort].join
+    [user.email, user.password, user.tags.map(&:to_s).sort].join
   end
 
   # This is a rather static key used to calculate whether a user state changed and needs to be propagated to the OAuth clients.

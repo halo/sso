@@ -4,7 +4,8 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true 
 
   # Client side
   let(:warden_env)      { {} }
-  let(:warden_request)  { double :warden_request, ip: ip, user_agent: agent, env: warden_env }
+  let(:client_params)   { { udid: 'unique device identifier' } }
+  let(:warden_request)  { double :warden_request, ip: ip, user_agent: agent, params: client_params, env: warden_env }
   let(:warden)          { double :warden, request: warden_request }
   let(:hook)            { described_class.new passport: client_passport, warden: warden, options: {} }
   let(:client_user)     { double :client_user }

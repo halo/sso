@@ -18,7 +18,7 @@
 * A public OAuth Client, such as an `iPhone`, uses the `Resource Owner Password Credentials Grant` to exchange the `username` and `password` of the end user for an OAuth `access_token` with the OAuth permission scope `outsider`.
 * You exchange the `access_token` for a passport token. That is effectively your API token used to communicate with the OAuth Rails clients.
 * The OAuth Rails clients verify that token with the OAuth server at every request.
-* In effect, this turns your iPhone app into a Browser, technically not an OAuth Client.
+* In effect, this turns your iPhone app into a Browser, technically not a trusted OAuth Client.
 
 #### Also good to know
 
@@ -35,7 +35,22 @@ gem 'sso', require: 'sso/client'
 
 #### Make sure you activated the Warden middleware provided by the `warden` gem
 
-See [the Warden wiki](https://github.com/hassox/warden/wiki/Setup)
+See [the Warden wiki](https://github.com/hassox/warden/wiki/Setup).
+However, one thing is special here, you must not store the entire object, but only a reference to the passport.
+If you store the entire object, that would be a major security risk and allow for cookie replay attacks.
+
+```
+class Warden::SessionSerializer
+  def serialize(passport)
+    Redis.set passport.id, passport.to_json
+  end
+
+  def deserialize(passport_id)
+    json = Redis.get passport_id
+    SSO::Client::Passport.new JSON.parse(json)
+  end
+end
+```
 
 #### Set the URL to the SSO Server
 

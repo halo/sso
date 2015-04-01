@@ -5,6 +5,7 @@ module SSO
     # This could be MongoDB or whatever
     class Passport < ActiveRecord::Base
       include ::SSO::Logging
+      include ::SSO::Benchmarking
 
       self.table_name = 'passports'
 
@@ -49,26 +50,29 @@ module SSO
       end
 
       def state!
-        result = nil
-        time = Benchmark.realtime do
-          result = OpenSSL::HMAC.hexdigest user_state_digest, user_state_key, user_state_base
+        benchmark 'Passport user state calculation' do
+          OpenSSL::HMAC.hexdigest user_state_digest, user_state_key, user_state_base
         end
-        debug { "The user state digest is #{result.inspect}" }
-        debug { "Calculating the user state took #{(time * 1000).round(2)}ms" }
-        result
       end
 
       def create_chip!
-        ensure_secret
-        cipher = chip_digest
-        cipher.encrypt
-        cipher.key = chip_key
-        chip_iv = cipher.random_iv
-        ciphertext = cipher.update chip_plaintext
-        ciphertext << cipher.final
-        chip = [Base64.encode64(ciphertext).strip(), Base64.encode64(chip_iv).strip()].join('|')
-        logger.debug { "Augmented passport #{id.inspect} with chip #{chip.inspect}" }
-        @chip = chip
+        @chip = chip!
+      end
+
+      def chip!
+        benchmark 'Passport chip encryption' do
+          ensure_secret
+          cipher = chip_digest
+          cipher.encrypt
+          cipher.key = chip_key
+          chip_iv = cipher.random_iv
+          ciphertext = cipher.update chip_plaintext
+          ciphertext << cipher.final
+          debug { "The Passport chip plaintext #{chip_plaintext.inspect} was encrypted using key #{chip_key.inspect} and IV #{chip_iv.inspect} and resultet in ciphertext #{ciphertext.inspect}" }
+          chip = [Base64.encode64(ciphertext).strip(), Base64.encode64(chip_iv).strip()].join('|')
+          logger.debug { "Augmented passport #{id.inspect} with chip #{chip.inspect}" }
+          chip
+        end
       end
 
       def user_state_digest

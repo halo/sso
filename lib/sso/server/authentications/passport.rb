@@ -33,6 +33,7 @@ module SSO
           end
 
           debug { 'The request was properly signed, I found the corresponding passport.' }
+          load_passport_user
           update_passport
 
           if passport.state == state
@@ -44,11 +45,13 @@ module SSO
         end
 
         def check_arguments
+          debug { 'Checking arguments...' }
           yield Operations.failure :missing_verb         if verb.blank?
           yield Operations.failure :missing_passport_id  if passport_id.blank?
           yield Operations.failure :missing_state        if state.blank?
           yield Operations.failure :passport_not_found   if passport.blank?
           yield Operations.failure :passport_revoked     if passport.invalid?
+          debug { 'Arguments are fine.' }
           # yield Operations.failure :user_not_encapsulated if passport.user.blank?
           Operations.success :arguments_are_valid
         end
@@ -73,17 +76,29 @@ module SSO
           [200, { 'Content-Type' => 'application/json' }, [payload.to_json]]
         end
 
+        def load_passport_user
+          passport.user = SSO.config.find_user_for_passport.call(passport: passport, ip: ip)
+        end
+
         def passport
-          @passport ||= backend.find_by_id passport_id
+          @passport ||= passport!
+        end
+
+        def passport!
+          return unless record = backend.find_by_id(passport_id)
+          debug { "Successfully loaded Passport #{passport_id} from database. Attaching user to it..." }
+          record
         end
 
         def passport_id
           signature_request.authenticate { |passport_id| return passport_id }
+
         rescue Signature::AuthenticationError
           nil
         end
 
         def valid_signature?
+          debug { 'Checking request signature...' }
           signature_request.authenticate { Signature::Token.new passport_id, passport.secret }
           true
         rescue Signature::AuthenticationError
@@ -117,7 +132,7 @@ module SSO
 
         def insider?
           if app_scopes.empty?
-            warn { "Doorkeeper::Application #{application.name} with ID #{application.id} has no scope restrictions. Assuming 'outsider' for now." }
+            warn { "Doorkeeper::Application #{application.name.inspect} with ID #{application.id.inspect} has no scope restrictions. Assuming 'outsider' for now." }
             return false
           end
 

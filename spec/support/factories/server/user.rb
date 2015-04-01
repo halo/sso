@@ -5,7 +5,7 @@ FactoryGirl.define do
     end
 
     name         { %w(Alice Bob Carol Eve Frank).sample }
-    email        { "#{name.downcase}@email.com" }
+    email        { "#{name.downcase}@example.com" }
     password     { %w(p4ssword s3same l3tmein).sample }
     tags         { [[%w(password_expired superuser).sample, %w(admin confirmed).sample], []].sample }
     vip          { [true, false].sample }

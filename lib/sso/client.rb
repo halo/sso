@@ -4,5 +4,8 @@ require 'warden'
 
 require 'sso'
 require 'sso/client/passport'
+require 'sso/client/passport_verifier'
 require 'sso/client/omniauth/strategies/sso'
 require 'sso/client/warden/hooks/after_fetch'
+require 'sso/client/authentications/passport'
+require 'sso/client/warden/strategies/passport'

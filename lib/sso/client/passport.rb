@@ -2,10 +2,14 @@ module SSO
   module Client
     class Passport
 
-      attr_reader :id, :secret, :state, :user
+      attr_reader :id, :secret, :state, :user, :chip
 
-      def initialize(id:, secret:, state:, user:)
-        @id, @secret, @state, @user = id, secret, state, user
+      def initialize(id:, secret:, state:, user:, chip: nil)
+        @id     = id
+        @secret = secret
+        @state  = state
+        @user   = user
+        @chip   = chip
       end
 
       def verified!

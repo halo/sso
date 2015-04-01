@@ -24,6 +24,8 @@ class CreatePassportsTable < ActiveRecord::Migration
       t.timestamps null: false
     end
 
+    # Doorkeeper is not guaranteed to create a new access token upon each login, it may just return an existing one
+    # That's why we need to check for `revoked_at`, only valid passports bear the constraint
     add_index :passports, [:owner_id, :oauth_access_token_id], where: 'revoked_at IS NULL AND oauth_access_token_id IS NOT NULL', unique: true, name: :one_access_token_per_owner
 
     add_index :passports, :oauth_access_grant_id

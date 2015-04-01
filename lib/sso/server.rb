@@ -11,8 +11,6 @@ require 'sso/server/errors'
 require 'sso/server/passport'
 require 'sso/server/passports'
 require 'sso/server/geolocations'
-require 'sso/server/configuration'
-require 'sso/server/configure'
 require 'sso/server/engine'
 
 require 'sso/server/authentications/passport'

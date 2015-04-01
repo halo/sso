@@ -3,15 +3,12 @@ require 'logger'
 module SSO
   class Configuration
 
+    # Server
+
     def human_readable_location_for_ip
       @human_readable_location_for_ip || default_human_readable_location_for_ip
     end
     attr_writer :human_readable_location_for_ip
-
-    def exception_handler
-      @exception_handler || default_exception_handler
-    end
-    attr_writer :exception_handler
 
     def user_state_base
       @user_state_base || fail('You need to configure user_state_base, see SSO::Configuration for more info.')
@@ -27,6 +24,20 @@ module SSO
       @user_state_key || fail('You need to configure a secret user_state_key, see SSO::Configuration for more info.')
     end
     attr_writer :user_state_key
+
+    # Client
+
+    def session_backend
+      @session_backend || default_session_backend
+    end
+    attr_writer :session_backend
+
+    # Both
+
+    def exception_handler
+      @exception_handler || default_exception_handler
+    end
+    attr_writer :exception_handler
 
     def passport_chip_key
       @passport_chip_key || fail('You need to configure a secret passport_chip_key, see SSO::Configuration for more info.')
@@ -67,7 +78,7 @@ module SSO
     end
 
     def default_exception_handler
-      proc do
+      proc do |exception|
         return unless ::SSO.config.logger
         ::SSO.config.logger.error(self.class) do
           "An internal error occured #{exception.class.name} #{exception.message} #{exception.backtrace[0..5].join(' ') if exception.backtrace}"
@@ -79,6 +90,11 @@ module SSO
       proc do
         'Unknown'
       end
+    end
+
+    def default_session_backend
+      fail('You need to configure session_backend, see SSO::Configuration for more info.') unless %w(developmen test).include?(environment)
+     # Moneta.new :Memory
     end
 
   end
