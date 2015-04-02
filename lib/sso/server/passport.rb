@@ -10,17 +10,13 @@ module SSO
       self.table_name = 'passports'
 
       before_validation :ensure_secret
-      before_validation :ensure_group_id
       before_validation :ensure_activity_at
 
       before_save :update_location
 
-      belongs_to :application, class_name: 'Doorkeeper::Application'
-
-      validates :secret, :group_id, presence: true
+      validates :secret, presence: true
       validates :oauth_access_token_id, uniqueness: { scope: [:owner_id, :revoked_at], allow_blank: true }
       validates :revoke_reason, allow_blank: true, format: { with: /\A[a-z_]+\z/ }
-      validates :application_id, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
       attr_accessor :user
       attr_reader :chip
@@ -104,10 +100,6 @@ module SSO
 
       def ensure_secret
         self.secret ||= SecureRandom.uuid
-      end
-
-      def ensure_group_id
-        self.group_id ||= SecureRandom.uuid
       end
 
       def ensure_activity_at

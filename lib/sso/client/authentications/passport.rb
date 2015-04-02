@@ -17,11 +17,11 @@ module SSO
 
           if result.success?
             debug { "Authentication succeeded." }
-          else
-            debug { "The Client Passport authentication failed: #{result.code}" }
+            return result
           end
 
-          result
+          debug { "The Client Passport authentication failed: #{result.code}" }
+          Operations.failure :passport_authentication_failed, object: failure_rack_array
         end
 
         private
@@ -38,6 +38,7 @@ module SSO
         end
 
         def retrieve_passport
+          debug { 'Retrieving Passport from server...' }
           if verification.success? && verification.code == :passport_valid_and_modified
             passport = verification.object
 
@@ -60,7 +61,7 @@ module SSO
 
         rescue ::Signature::AuthenticationError => exception
           debug { "The Signature Authentication failed. #{exception.message}" }
-          yield Operations.failure :invalid_passport_signature, object: failure_rack_array
+          yield Operations.failure :invalid_passport_signature
         end
 
         def verifier

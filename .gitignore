@@ -1,6 +1,7 @@
 .DS_Store
 *.gem
 /.bundle
+tmp
 coverage/*
 !coverage/.gitkeep
 !coverage/README.md

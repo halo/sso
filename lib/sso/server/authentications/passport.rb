@@ -122,21 +122,12 @@ module SSO
           end
         end
 
-        def application
-          passport.application
-        end
-
         def app_scopes
           application.scopes
         end
 
         def insider?
-          if app_scopes.empty?
-            warn { "Doorkeeper::Application #{application.name.inspect} with ID #{application.id.inspect} has no scope restrictions. Assuming 'outsider' for now." }
-            return false
-          end
-
-          app_scopes.has_scopes? [:insider]
+          passport.insider?
         end
 
         def ip

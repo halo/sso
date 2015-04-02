@@ -4,7 +4,7 @@
 
 SSO.configure do |config|
 
-  config.find_user_for_passport = proc do |passport: passport, ip: ip|
+  config.find_user_for_passport = proc do |passport:, ip: nil|
     # This is your chance to modify the user instance before it is handed out to the OAuth client apps.
 
     progname = 'SSO.config.find_user_for_passport'
@@ -13,11 +13,14 @@ SSO.configure do |config|
     return unless user
 
     # The IP address, for example, might be used to set certain flags on the user object.
-    # If these flags are included in the #user_state base (see below), all OAuth client apps are immediately aware of the change.
+    # Note that the IP can be nil in which case we don't know it.
+
     if ip == '198.51.100.74'
       user.tags << :is_at_the_office
-    else
+    elsif ip
       user.tags << :is_working_from_home
+    else
+      user.tags << :location_is_unknown
     end
 
     user

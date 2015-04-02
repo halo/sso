@@ -21,7 +21,7 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true 
 
   # Server side
   let!(:server_user)     { create :user }
-  let!(:server_passport) { create :passport, user: server_user, owner_id: server_user.id, ip: ip, agent: agent, application_id: oauth_app.id }
+  let!(:server_passport) { create :passport, user: server_user, owner_id: server_user.id, ip: ip, agent: agent }
 
   context 'no changes' do
     it 'verifies the passport' do

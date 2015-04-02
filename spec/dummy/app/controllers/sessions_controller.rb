@@ -16,7 +16,7 @@ class SessionsController < ApplicationController
     warden.authenticate! :password
 
     if session[:return_path]
-      debug { "Sending tou back to #{session[:return_path]}" }
+      debug { "Sending you back to #{session[:return_path]}" }
       redirect_to session[:return_path]
       session[:return_path] = nil
     else

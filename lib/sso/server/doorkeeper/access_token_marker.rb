@@ -53,7 +53,7 @@ module SSO
           local_passport_id = session[:passport_id] # <- We know this always exists because it was set in this very response
           debug { %(Detected outgoing "Access Token" #{outgoing_access_token.inspect} of the "Resource Owner Password Credentials Grant" flow.) }
           debug { %(Augmenting local Passport #{local_passport_id.inspect} with this outgoing Access Token...) }
-          generation = ::SSO::Server::Passports.register_access_token passport_id: local_passport_id, access_token: outgoing_access_token
+          generation = ::SSO::Server::Passports.register_access_token_from_id passport_id: local_passport_id, access_token: outgoing_access_token
 
           return if generation.success?
           warn { 'The passport could not be generated. Destroying warden session.' }

@@ -4,7 +4,5 @@ FactoryGirl.define do
     factory :passport do
     end
 
-    group_id { SecureRandom.hex }
-
   end
 end

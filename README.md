@@ -77,11 +77,14 @@ Don't worry, by and by you will come to understand what the columns mean.
 # This table leverages Postgres-specific column types (uuid, inet, hstore).
 # But there is no reason why this should not work with any other database.
 
+enable_extension 'uuid-ossp'
+enable_extension 'hstore'
+
 create_table :passports, id: :uuid do |t|
   # Relationships with Doorkeeper-internal tables
   t.integer :oauth_access_grant_id     # OAuth Grant Token
   t.integer :oauth_access_token_id     # OAuth Access Token
-  t.bool :insider                      # Denormalized: Is the client app trusted?
+  t.boolean :insider                   # Denormalized: Is the client app trusted?
 
   # Passport information
   t.integer :owner_id, null: false               # User ID
@@ -100,6 +103,22 @@ create_table :passports, id: :uuid do |t|
   t.string :revoke_reason                # Slug describing why deleted (logout, timeout, etc)
   t.timestamps null: false               # Internal Rails created_at and updated_at columns
 end
+
+# Doorkeeper is not guaranteed to create a new access token upon each login, it may just return an existing one
+# That's why we need to check for `revoked_at`, only valid passports bear the constraint
+add_index :passports, [:owner_id, :oauth_access_token_id], where: 'revoked_at IS NULL AND oauth_access_token_id IS NOT NULL', unique: true, name: :one_access_token_per_owner
+
+add_index :passports, :oauth_access_grant_id
+add_index :passports, :oauth_access_token_id
+add_index :passports, :insider
+add_index :passports, :owner_id
+add_index :passports, :secret
+add_index :passports, :activity_at
+add_index :passports, :ip
+add_index :passports, :location
+add_index :passports, :device
+add_index :passports, :revoked_at
+add_index :passports, :revoke_reason
 ```
 
 In the `oauth_applicationns` table, `Alpha` is defined to only allow the `insider` scope.

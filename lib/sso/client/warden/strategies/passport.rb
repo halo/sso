@@ -5,6 +5,7 @@ module SSO
         # When the iPhone presents a Passport to Alpha, this is how Alpha verifies it with Bouncer.
         class Passport < ::Warden::Strategies::Base
           include ::SSO::Logging
+          include ::SSO::Benchmarking
 
           def valid?
             params['auth_version'].to_s != '' && params['state'] != ''
@@ -13,12 +14,7 @@ module SSO
           def authenticate!
             debug { 'Authenticating from Passport...' }
 
-            authentication = nil
-            time = Benchmark.realtime do
-              authentication = ::SSO::Client::Authentications::Passport.new(request).authenticate
-            end
-
-            info { "The Passport verification took #{(time * 1000).round}ms" }
+            authentication = passport_authentication
 
             if authentication.success?
               debug { 'Authentication from Passport successful.' }
@@ -30,8 +26,14 @@ module SSO
               custom! authentication.object
             end
 
-          #rescue => exception
-          #  ::SSO.config.exception_handler.call exception
+          rescue => exception
+            ::SSO.config.exception_handler.call exception
+          end
+
+          def passport_authentication
+            benchmark 'Passport proxy verification' do
+              ::SSO::Client::Authentications::Passport.new(request).authenticate
+            end
           end
 
         end

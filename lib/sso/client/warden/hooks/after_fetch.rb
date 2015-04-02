@@ -15,6 +15,7 @@ module SSO
 
           attr_reader :passport, :warden, :options
           delegate :request, to: :warden
+          delegate :params, to: :request
 
           def self.activate(warden_options)
             ::Warden::Manager.after_fetch(warden_options) do |passport, warden, options|
@@ -116,7 +117,7 @@ module SSO
           end
 
           def device_id
-            request.params['udid']
+            params['udid']
           end
 
           def warden_scope

@@ -85,11 +85,12 @@ module SSO
         (timeout_in_seconds * 1000).round
       end
 
+      # TODO
       def timeout_in_seconds
         0.1.seconds
       end
 
-      # Needs to be configurable
+      # TODO Needs to be configurable
       def path
         OmniAuth::Strategies::SSO.passports_path
       end
@@ -111,6 +112,7 @@ module SSO
       end
 
       def response!
+        debug { "Fetching Passport from #{endpoint.inspect}" }
         benchmark 'Passport authorization request' do
           ::HTTParty.get endpoint, timeout: timeout_in_seconds, query: query_params, headers: { 'Accept' => 'application/json' }
         end

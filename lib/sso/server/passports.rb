@@ -17,10 +17,10 @@ module SSO
         Operations.failure :backend_error, object: exception
       end
 
-      def self.generate(owner_id:, ip:, agent:)
-        debug { "Generating Passport for user ID #{owner_id.inspect} and IP #{ip.inspect} and Agent #{agent.inspect}" }
+      def self.generate(owner_id:, ip:, agent:, device: nil)
+        debug { "Generating Passport for user ID #{owner_id.inspect} and IP #{ip.inspect} and Agent #{agent.inspect} and Device #{device.inspect}" }
 
-        record = backend.create owner_id: owner_id, ip: ip, agent: agent, application_id: 0
+        record = backend.create owner_id: owner_id, ip: ip, agent: agent, device: device
 
         if record.persisted?
           debug { "Successfully generated passport with ID #{record.id}" }
@@ -55,7 +55,7 @@ module SSO
         end
       end
 
-      def self.register_access_token(passport_id:, access_token:)
+      def self.register_access_token_from_id(passport_id:, access_token:)
         access_token = find_valid_access_token(access_token) { |failure| return failure }
         record       = find_valid_passport(passport_id)      { |failure| return failure }
 
@@ -67,19 +67,19 @@ module SSO
         end
       end
 
-      def self.logout(passport_id:, provider_passport_id:)
-        if passport_id.present? || provider_passport_id.present?
-          debug { "Attemting to logout Passport groups of Passport IDs #{passport_id.inspect} and #{provider_passport_id.inspect}..." }
+      def self.logout(passport_id:)
+        return Operations.failure(:missing_passport_id) if passport_id.blank?
+
+        debug { "Logging out Passport with ID #{passport_id.inspect}" }
+        record = backend.find_by_id passport_id
+        return Operations.success(:passport_does_not_exist) unless record
+        return Operations.success(:passport_already_revoked) if record.revoked_at
+
+        if record.update_attributes revoked_at: Time.now, revoke_reason: :logout
+          Operations.success :passports_revoked
         else
-          debug { "Should logout Passport groups now, but don't know which ones. Moving on..." }
-          return Operations.success :nothing_to_revoke_from
+          Operations.failure :backend_could_not_revoke_passport
         end
-
-        count = 0
-        count += logout_cluster(passport_id) if passport_id.present?
-        count += logout_cluster(provider_passport_id) if provider_passport_id.present?
-
-        Operations.success :passports_revoked, object: count
       end
 
       private
@@ -125,18 +125,6 @@ module SSO
           yield Operations.failure :access_token_not_found
           nil
         end
-      end
-
-      def self.logout_cluster(passport_id)
-        unless passport_id.present? && record = backend.find_by_id(passport_id)
-          debug { "Cannot revoke Passport group of Passport ID #{passport_id.inspect} because it does not exist." }
-          return 0
-        end
-
-        debug { "Revoking Passport group #{record.group_id.inspect} of Passport ID #{passport_id.inspect}" }
-        affected_row_count = backend.where(group_id: record.group_id).update_all revoked_at: Time.now, revoke_reason: :logout
-        debug { "Successfully revoked #{affected_row_count.inspect} Passports." }
-        affected_row_count
       end
 
       def self.backend

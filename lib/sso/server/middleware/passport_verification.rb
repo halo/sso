@@ -15,13 +15,13 @@ module SSO
             debug { 'Detected incoming Passport verification request.' }
             env['warden'].authenticate! :passport
           else
-            debug { "I'm not interested in this request to #{request.path}" }
+            debug { "I'm not interested in this #{request.request_method.inspect} request to #{request.path.inspect} I only care for GET #{passports_path.inspect}" }
             @app.call(env)
           end
         end
 
         def passports_path
-          OmniAuth::Strategies::SSO.passports_path
+          ::OmniAuth::Strategies::SSO.passports_path
         end
 
       end

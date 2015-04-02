@@ -33,7 +33,7 @@ RSpec.describe SSO::Client::Authentications::Passport, type: :request, db: true 
 
   # Server
   let!(:server_user)     { create :user, name: 'Emily', tags: %i(cool nice) }
-  let!(:server_passport) { create :passport, user: server_user, owner_id: server_user.id, ip: ip, agent: agent, application_id: oauth_app.id }
+  let!(:server_passport) { create :passport, user: server_user, owner_id: server_user.id, ip: ip, agent: agent }
 
   before do
     SSO.config.passport_chip_key = SecureRandom.hex

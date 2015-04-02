@@ -13,7 +13,7 @@ module SSO
           remote_ip = request.env['action_dispatch.remote_ip'].to_s
 
           if !(request.post? && request.path == passports_path)
-            debug { "I'm not interested in this request to #{request.path}" }
+            debug { "I'm not interested in this #{request.request_method.inspect} request to #{request.path.inspect} I only care for POST #{passports_path.inspect}" }
             return @app.call(env)
           end
 
