@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'sso'
-  s.version     = '0.1.0.alpha5'
+  s.version     = '0.1.0.alpha6'
   s.date        = '2015-03-26'
   s.summary     = 'Leveraging Doorkeeper as single-sign-on OAuth server.'
   s.description = "#{s.summary} To provide true single-sign-OUT, every request on an OAuth client app is verified with the SSO server."
