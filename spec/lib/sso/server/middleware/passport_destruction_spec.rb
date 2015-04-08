@@ -18,7 +18,7 @@ RSpec.describe SSO::Server::Middleware::PassportDestruction, type: :request, db:
 
     it 'revokes the passport' do
       delete "/oauth/sso/v1/passports/#{passport.id}"
-      expect(updated_passport.revoked_at).to eq Time.now
+      expect(updated_passport.revoked_at.to_i).to eq Time.now.to_i
     end
   end
 
