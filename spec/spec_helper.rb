@@ -23,6 +23,7 @@ RSpec.configure do |config|
 
   config.include FactoryGirl::Syntax::Methods
   config.include SSO::Test::Helpers
+  config.include Warden::Test::Helpers
 
   config.color = true
   config.disable_monkey_patching!
@@ -45,6 +46,7 @@ RSpec.configure do |config|
 
   config.after :each do
     Timecop.return
+    Warden.test_reset!
   end
 
   config.after :each, db: true do

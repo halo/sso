@@ -18,6 +18,7 @@ module SSO
 
           passport_id = request.path.to_s.split('/').last
           revocation = ::SSO::Server::Passports.logout passport_id: passport_id
+          env['warden'].logout
 
           payload = { success: true, code: revocation.code }
           debug { "Revoked Passport with ID #{passport_id.inspect}" }
