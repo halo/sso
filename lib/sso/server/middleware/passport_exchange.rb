@@ -1,7 +1,9 @@
 module SSO
   module Server
     module Middleware
-      class PassportCreation
+      # Hands out the Passport when presented with the corresponding Access Token.
+      #
+      class PassportExchange
         include ::SSO::Logging
 
         def initialize(app)
@@ -11,6 +13,7 @@ module SSO
         def call(env)
           request = Rack::Request.new(env)
           remote_ip = request.env['action_dispatch.remote_ip'].to_s
+          device_id = request.params['device_id']
 
           if !(request.post? && request.path == passports_path)
             debug { "I'm not interested in this #{request.request_method.inspect} request to #{request.path.inspect} I only care for POST #{passports_path.inspect}" }
@@ -29,18 +32,17 @@ module SSO
             return json_code :access_token_invalid
           end
 
-          creation = ::SSO::Server::Passports.generate owner_id: access_token.resource_owner_id, ip: remote_ip, agent: request.user_agent
-          passport_id = creation.object
-          finding = ::SSO::Server::Passports.find(passport_id)
-
+          finding = ::SSO::Server::Passports.find_by_access_token_id(access_token.id)
           if finding.failure?
-            error { "Could not find newly generated Passport #{finding.code.inspect} - #{finding.object.inspect}"}
-            return json_code :access_token_not_attached_to_valid_passport
+            # This should never happen. Every Access Token should be connected to a Passport.
+            return json_code :passport_not_found
           end
-
           passport = finding.object
-          debug { "Attaching user to passport #{passport.inspect}" }
-          passport.user = SSO.config.find_user_for_passport.call(passport: passport, ip: remote_ip)
+
+          ::SSO::Server::Passports.update_activity passport_id: passport.id, request: request
+
+          debug { "Attaching user and chip to passport #{passport.inspect}" }
+          passport.load_user!
           passport.create_chip!
 
           payload = { success: true, code: :here_is_your_passport, passport: passport.export }

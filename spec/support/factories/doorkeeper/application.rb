@@ -9,9 +9,6 @@ FactoryGirl.define do
       scopes { :outsider }
     end
 
-    factory :unscoped_doorkeeper_application do
-    end
-
     uid          { SecureRandom.hex }
     secret       { SecureRandom.hex }
     name         { %w(Alpha Beta Gamma Delta Epsilon).sample }

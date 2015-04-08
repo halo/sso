@@ -33,6 +33,8 @@ module Dummy
     end
 
     config.middleware.insert_after ::Warden::Manager, ::SSO::Server::Middleware::PassportVerification
+    config.middleware.insert_after ::Warden::Manager, ::SSO::Server::Middleware::PassportDestruction
+    config.middleware.insert_after ::Warden::Manager, ::SSO::Server::Middleware::PassportExchange
     config.middleware.insert_after ::Warden::Manager, ::SSO::Server::Doorkeeper::GrantMarker
     config.middleware.insert_after ::Warden::Manager, ::SSO::Server::Doorkeeper::AccessTokenMarker
 

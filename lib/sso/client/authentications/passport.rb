@@ -73,7 +73,7 @@ module SSO
         end
 
         def failure_rack_array
-          payload = { success: true, code: :invalid_passport_signature }
+          payload = { success: true, code: :passport_verification_failed }
           [200, { 'Content-Type' => 'application/json' }, [payload.to_json]]
         end
 
@@ -167,7 +167,7 @@ module SSO
         end
 
         def device_id
-          request.params['udid']
+          request.params['device_id']
         end
 
       end

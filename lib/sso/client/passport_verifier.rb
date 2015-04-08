@@ -81,13 +81,12 @@ module SSO
         signature_request.sign token
       end
 
-      def human_readable_timeout_in_ms
-        (timeout_in_seconds * 1000).round
+      def timeout_in_milliseconds
+        ::SSO.config.passport_verification_timeout_ms.to_i
       end
 
-      # TODO
       def timeout_in_seconds
-        0.1.seconds
+        (timeout_in_milliseconds / 1000).round 2
       end
 
       # TODO Needs to be configurable

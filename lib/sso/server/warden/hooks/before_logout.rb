@@ -26,7 +26,7 @@ module SSO
 
           def call
             debug { 'Before warden destroys the passport in the cookie, it will revoke all connected Passports as well.' }
-            revoking = Passports.logout passport_id: params['passport_id'], provider_passport_id: session['passport_id']
+            revoking = Passports.logout passport_id: params['passport_id']
 
             error { 'Could not revoke the Passports.' } if revoking.failure?
             debug { 'Finished.' }

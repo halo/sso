@@ -117,7 +117,7 @@ module SSO
           end
 
           def device_id
-            params['udid']
+            params['device_id']
           end
 
           def warden_scope

@@ -8,18 +8,12 @@ group :red_green_refactor, halt_on_fail: true do
     watch(rspec.spec_support) { rspec.spec_dir }
     watch(rspec.spec_files)
 
-    watch(%r{^lib/sso/server/warden/strategies/passport\.rb})       { 'spec/lib/sso/client/warden/hooks/after_fetch_spec.rb' }
-    watch(%r{^lib/sso/server/middleware/passport_verification\.rb}) { 'spec/lib/sso/client/warden/hooks/after_fetch_spec.rb' }
-    watch(%r{^lib/sso/server/authentications/passport\.rb})         { 'spec/lib/sso/client/warden/hooks/after_fetch_spec.rb' }
-    watch(%r{^lib/sso/server/passport\.rb})                         { 'spec/lib/sso/client/warden/hooks/after_fetch_spec.rb' }
-    watch(%r{^lib/sso/server/doorkeeper/.+_marker\.rb})             { 'spec/integration' }
-
     ruby = dsl.ruby
     dsl.watch_spec_files_for(ruby.lib_files)
   end
 
-  guard :rubocop do
-    watch(/.+\.rb$/)
-    watch(/(?:.+\/)?\.rubocop.+\.yml$/) { |m| File.dirname(m[0]) }
-  end
+  #guard :rubocop do
+  #  watch(/.+\.rb$/)
+  #  watch(/(?:.+\/)?\.rubocop.+\.yml$/) { |m| File.dirname(m[0]) }
+  #end
 end

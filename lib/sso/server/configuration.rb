@@ -32,6 +32,11 @@ module SSO
     end
     attr_writer :session_backend
 
+    def passport_verification_timeout_ms
+      @passport_verification_timeout_ms || default_passport_verification_timeout_ms
+    end
+    attr_writer :passport_verification_timeout_ms
+
     # Both
 
     def exception_handler
@@ -95,6 +100,10 @@ module SSO
     def default_session_backend
       fail('You need to configure session_backend, see SSO::Configuration for more info.') unless %w(developmen test).include?(environment)
      # Moneta.new :Memory
+    end
+
+    def default_passport_verification_timeout_ms
+      100
     end
 
   end

@@ -27,7 +27,7 @@ module SSO
             request = warden.request
             session = warden.env['rack.session']
 
-            debug { "Generating a passport for user #{user.id.inspect} for the session cookie at the SSO server..." }
+            debug { "Generating a passport for user #{user.id.inspect} for the session with the SSO server..." }
             attributes = { owner_id: user.id, ip: request.ip, agent: request.user_agent }
 
             generation = SSO::Server::Passports.generate attributes

@@ -12,7 +12,7 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true 
   let(:client_passport) { ::SSO::Client::Passport.new id: passport_id, secret: passport_secret, state: passport_state, user: client_user }
 
   # Shared
-  let!(:oauth_app)      { create :unscoped_doorkeeper_application }
+  let!(:oauth_app)      { create :outsider_doorkeeper_application }
   let(:passport_id)     { server_passport.id }
   let(:passport_state)  { server_passport.state }
   let(:passport_secret) { server_passport.secret }

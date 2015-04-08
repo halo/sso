@@ -32,9 +32,10 @@ module SSO
             return Operations.failure :invalid_signature, object: failure_rack_array
           end
 
-          debug { 'The request was properly signed, I found the corresponding passport.' }
-          load_passport_user
+          debug { 'The request was properly signed, I found the corresponding passport. Updating activity...' }
           update_passport
+          debug { 'Attaching user to passport' }
+          passport.load_user!
 
           if passport.state == state
             Operations.success :signature_approved_no_changes, object: success_same_state_rack_array
@@ -52,7 +53,7 @@ module SSO
           yield Operations.failure :passport_not_found   if passport.blank?
           yield Operations.failure :passport_revoked     if passport.invalid?
           debug { 'Arguments are fine.' }
-          # yield Operations.failure :user_not_encapsulated if passport.user.blank?
+          #yield Operations.failure :user_not_encapsulated if passport.user.blank?
           Operations.success :arguments_are_valid
         end
 
@@ -76,17 +77,13 @@ module SSO
           [200, { 'Content-Type' => 'application/json' }, [payload.to_json]]
         end
 
-        def load_passport_user
-          passport.user = SSO.config.find_user_for_passport.call(passport: passport, ip: ip)
-        end
-
         def passport
           @passport ||= passport!
         end
 
         def passport!
           return unless record = backend.find_by_id(passport_id)
-          debug { "Successfully loaded Passport #{passport_id} from database. Attaching user to it..." }
+          debug { "Successfully loaded Passport #{passport_id} from database." }
           record
         end
 
@@ -111,43 +108,7 @@ module SSO
         end
 
         def update_passport
-          debug { "Will update activity of Passport #{passport.id} if neccesary..." }
-          if passport.ip.to_s == ip.to_s && passport.agent.to_s == user_agent.to_s
-            debug { "No changes in IP or User Agent so I won't perform an update now..." }
-            Operations.success :already_up_to_date
-          else
-            debug { "Yes, it is necessary, updating activity of Passport #{passport.id}" }
-            passport.update_attributes ip: ip.to_s, agent: user_agent, activity_at: Time.now
-            Operations.success :passport_metadata_updated
-          end
-        end
-
-        def app_scopes
-          application.scopes
-        end
-
-        def insider?
-          passport.insider?
-        end
-
-        def ip
-          if insider?
-            params['ip']
-          else
-            request_ip
-          end
-        end
-
-        def user_agent
-          if insider?
-            params['user_agent']
-          else
-            request.user_agent
-          end
-        end
-
-        def request_ip
-          request.env['action_dispatch.remote_ip'] || fail('Whoops, I thought you were using Rails, but action_dispatch.remote_ip is empty!')
+          ::SSO::Server::Passports.update_activity passport_id: passport.id, request: request
         end
 
         def verb

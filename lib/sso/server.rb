@@ -15,7 +15,8 @@ require 'sso/server/engine'
 
 require 'sso/server/authentications/passport'
 require 'sso/server/middleware/passport_verification'
-require 'sso/server/middleware/passport_creation'
+require 'sso/server/middleware/passport_destruction'
+require 'sso/server/middleware/passport_exchange'
 
 require 'sso/server/warden/hooks/after_authentication'
 require 'sso/server/warden/hooks/before_logout'

@@ -4,20 +4,21 @@
 
 SSO.configure do |config|
 
-  config.find_user_for_passport = proc do |passport:, ip: nil|
+  config.find_user_for_passport = proc do |passport:|
     # This is your chance to modify the user instance before it is handed out to the OAuth client apps.
+    # The Passport has already been updated with the most recent IP metadata, so you can take that into consideration.
 
     progname = 'SSO.config.find_user_for_passport'
-    Rails.logger.debug(progname) { "Looking up User #{passport.owner_id.inspect} belonging to Passport #{passport.id.inspect} surfing with IP #{ip.inspect}..." }
+    Rails.logger.debug(progname) { "Looking up User #{passport.owner_id.inspect} belonging to Passport #{passport.id.inspect} surfing with IP #{passport.ip} or #{passport.ip}..." }
     user = User.find_by_id passport.owner_id
     return unless user
 
     # The IP address, for example, might be used to set certain flags on the user object.
     # Note that the IP can be nil in which case we don't know it.
 
-    if ip == '198.51.100.74'
+    if passport.ip == '198.51.100.74'
       user.tags << :is_at_the_office
-    elsif ip
+    elsif passport.ip
       user.tags << :is_working_from_home
     else
       user.tags << :location_is_unknown
