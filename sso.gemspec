@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'sso'
-  s.version     = '0.1.0.alpha6'
+  s.version     = '0.1.0.alpha7'
   s.date        = '2015-03-26'
   s.summary     = 'Leveraging Doorkeeper as single-sign-on OAuth server.'
   s.description = "#{s.summary} To provide true single-sign-OUT, every request on an OAuth client app is verified with the SSO server."
@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 2.0.0'
 
-  s.files       = Dir['lib/sso/**/*'] & `git ls-files -z`.split("\0")
+  s.files       = Dir['lib/**/*'] & `git ls-files -z`.split("\0")
   s.test_files  = Dir['spec/**/*'] & `git ls-files -z`.split("\0")
 
   # Server
