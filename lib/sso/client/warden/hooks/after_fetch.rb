@@ -63,15 +63,18 @@ module SSO
             when :server_response_missing_success_flag! then server_response_missing_success_flag!
             when :server_response_unsuccessful!         then server_response_unsuccessful!
             when :passport_valid                        then passport_valid!
-            when :passport_valid_and_modified           then passport_valid_and_modified!
+            when :passport_valid_and_modified           then passport_valid_and_modified!(verification.object)
             when :passport_invalid                      then passport_invalid!
             else                                             unexpected_server_response_status!
             end
           end
 
-          def passport_valid_and_modified!
+          def passport_valid_and_modified!(modified_passport)
             debug { 'Valid passport, but state changed' }
             passport.verified!
+            passport.modified!
+            passport.user = modified_passport.user
+            passport.state = modified_passport.state
             # meter status: :valid, passport_id: user.passport_id
           end
 

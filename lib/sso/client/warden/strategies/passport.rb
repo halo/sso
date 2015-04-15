@@ -17,7 +17,7 @@ module SSO
             authentication = passport_authentication
 
             if authentication.success?
-              debug { 'Authentication from Passport successful.' }
+              debug { 'Authentication on Client from Passport successful.' }
               debug { "Persisting trusted Passport #{authentication.object.inspect}" }
               success! authentication.object
             else

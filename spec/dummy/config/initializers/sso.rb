@@ -30,7 +30,7 @@ SSO.configure do |config|
   config.user_state_base = proc do |user|
     # Include the end-user credentials to force all OAuth client apps to refetch the end-user Passports.
     # This way you can revoke all relevant Passports on SSO-logout and the OAuth client apps are immediately aware of it.
-    [user.email, user.password, user.tags.map(&:to_s).sort].join
+    user.state_base
   end
 
   # This is a rather static key used to calculate whether a user state changed and needs to be propagated to the OAuth clients.

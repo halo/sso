@@ -38,6 +38,7 @@ module SSO
           passport.load_user!
 
           if passport.state == state
+            debug { "The current user state #{passport.state.inspect} did not change." }
             Operations.success :signature_approved_no_changes, object: success_same_state_rack_array
           else
             debug { "The current user state #{passport.state.inspect} does not match the provided state #{state.inspect}" }

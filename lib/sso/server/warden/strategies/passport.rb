@@ -16,7 +16,7 @@ module SSO
             authentication = passport_authentication
 
             if authentication.success?
-              debug { 'Authentication from Passport successful.' }
+              debug { 'Authentication on Server from Passport successful.' }
               debug { "Responding with #{authentication.object}" }
               custom! authentication.object
             else
