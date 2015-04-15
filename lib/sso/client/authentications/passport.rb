@@ -51,10 +51,9 @@ module SSO
         end
 
         def check_request_signature
-          debug { "Verifying request signature using Passport secret #{passport_secret.inspect}" }
+          debug { "Verifying request signature using Passport secret #{chip_passport_secret.inspect}" }
           signature_request.authenticate do |passport_id|
-            @passport_id = passport_id
-            Signature::Token.new passport_id, passport_secret
+            Signature::Token.new passport_id, chip_passport_secret
           end
           debug { 'Signature looks legit.' }
           Operations.success :passport_signature_valid
@@ -65,7 +64,7 @@ module SSO
         end
 
         def verifier
-          ::SSO::Client::PassportVerifier.new passport_id: passport_id, passport_state: 'refresh', passport_secret: passport_secret, user_ip: ip, user_agent: agent, device_id: device_id
+          ::SSO::Client::PassportVerifier.new passport_id: passport_id, passport_state: 'refresh', passport_secret: chip_passport_secret, user_ip: ip, user_agent: agent, device_id: device_id
         end
 
         def verification
@@ -82,8 +81,14 @@ module SSO
           ::Signature::Request.new request.request_method, request.path, request.params
         end
 
-        def check_chip
-          Operations.success :chip_syntax_valid
+        def passport_id
+          return @passport_id if @passport_id
+          signature_request.authenticate do |auth_key|
+            return @passport_id = auth_key
+          end
+
+        rescue ::Signature::AuthenticationError
+          nil
         end
 
         def chip_decryption
@@ -91,6 +96,7 @@ module SSO
           yield Operations.failure(:missing_chip, object: params) if chip.blank?
           yield Operations.failure(:missing_chip_key) unless chip_key
           yield Operations.failure(:missing_chip_iv) unless chip_iv
+          yield Operations.failure(:chip_does_not_belong_to_passport) unless chip_belongs_to_passport?
           Operations.success :here_is_your_chip_plaintext, object: decrypt_chip
 
         rescue OpenSSL::Cipher::CipherError => exception
@@ -113,8 +119,32 @@ module SSO
           end
         end
 
-        def passport_secret
-          decrypt_chip
+        def chip_passport_secret
+          decrypt_chip.to_s.split('|').last
+        end
+
+        def chip_passport_id
+          decrypt_chip.to_s.split('|').first
+        end
+
+        def chip_belongs_to_passport?
+          unless passport_id
+            debug { "Unknown passport_id" }
+            return false
+          end
+
+          unless chip_passport_id
+            debug { "Unknown passport_id" }
+            return false
+          end
+
+          if passport_id.to_s == chip_passport_id
+            debug { "The chip on passport #{passport_id.inspect} appears to belong to it." }
+            true
+          else
+            info { "The passport with ID #{passport_id.inspect} has a chip with the wrong ID #{chip_passport_id.inspect}" }
+            false
+          end
         end
 
         def chip_key

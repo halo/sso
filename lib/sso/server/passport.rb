@@ -91,7 +91,7 @@ module SSO
 
       # Don't get confused, the chip plaintext is the passport secret
       def chip_plaintext
-        secret
+        [id, secret].join '|'
       end
 
       def user_state_key
