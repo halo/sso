@@ -20,14 +20,6 @@ RSpec.describe SSO::Server::Middleware::PassportDestruction, type: :request, db:
       delete "/oauth/sso/v1/passports/#{passport.id}"
       expect(updated_passport.revoked_at.to_i).to eq Time.now.to_i
     end
-
-    it 'logs out from warden' do
-      Warden.on_next_request do |proxy|
-        expect(proxy).to receive(:logout)
-      end
-
-      delete "/oauth/sso/v1/passports/#{passport.id}"
-    end
   end
 
 end

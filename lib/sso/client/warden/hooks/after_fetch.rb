@@ -41,7 +41,6 @@ module SSO
 
           private
 
-
           def verifier
             ::SSO::Client::PassportVerifier.new passport_id: passport.id, passport_state: passport.state, passport_secret: passport.secret, user_ip: ip, user_agent: agent, device_id: device_id
           end

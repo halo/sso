@@ -32,7 +32,7 @@ RSpec.describe SSO::Client::Authentications::Passport, type: :request, db: true 
 
   # Server
   let(:insider)          { false }
-  let!(:server_user)     { create :user, name: 'Emily', tags: %i(cool nice) }
+  let(:server_user)      { create :user, name: 'Emily', tags: %i(cool nice) }
   let!(:server_passport) { create :passport, user: server_user, owner_id: server_user.id, ip: ip, agent: agent, insider: insider }
 
   before do
@@ -51,6 +51,10 @@ RSpec.describe SSO::Client::Authentications::Passport, type: :request, db: true 
 
       it 'verifies the passport' do
         expect(passport).to be_verified
+      end
+
+      it 'modifies the passport' do
+        expect(passport).to be_modified
       end
 
       it 'tracks the immediate request IP' do
@@ -74,6 +78,10 @@ RSpec.describe SSO::Client::Authentications::Passport, type: :request, db: true 
 
       it 'verifies the passport' do
         expect(passport).to be_verified
+      end
+
+      it 'modifies the passport' do
+        expect(passport).to be_modified
       end
 
       it 'tracks the untrusted client IP' do

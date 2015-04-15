@@ -43,6 +43,7 @@ If you store the entire object, that would be a major security risk and allow fo
 class Warden::SessionSerializer
   def serialize(passport)
     Redis.set passport.id, passport.to_json
+    passport.id
   end
 
   def deserialize(passport_id)

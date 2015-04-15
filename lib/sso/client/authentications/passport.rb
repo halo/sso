@@ -41,6 +41,7 @@ module SSO
           debug { 'Retrieving Passport from server...' }
           if verification.success? && verification.code == :passport_valid_and_modified
             passport = verification.object
+            passport.modified!
 
             debug { "Successfully retrieved Passport with ID #{passport_id} from server." }
             return passport

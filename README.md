@@ -228,6 +228,7 @@ Instead, `Alpha` saves the passport ID in a `alpha.dev` cookie and stores the re
 class Warden::SessionSerializer
   def serialize(passport)
     Redis.set passport.id, passport.to_json
+    passport.id
   end
 
   def deserialize(passport_id)
