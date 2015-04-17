@@ -1,4 +1,5 @@
 module SSO
+  # Helper to log results of benchmarks.
   module Benchmarking
     include ::SSO::Logging
 

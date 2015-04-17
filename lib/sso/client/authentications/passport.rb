@@ -1,6 +1,7 @@
 module SSO
   module Client
     module Authentications
+      # Logic to authenticate a Passport provided by an outsider app to an insider app.
       class Passport
         include ::SSO::Logging
         include ::SSO::Benchmarking
@@ -12,11 +13,11 @@ module SSO
         end
 
         def authenticate
-          debug { "Performing authentication..." }
+          debug { 'Performing authentication...' }
           result = authenticate!
 
           if result.success?
-            debug { "Authentication succeeded." }
+            debug { 'Authentication succeeded.' }
             return result
           end
 
@@ -65,7 +66,18 @@ module SSO
         end
 
         def verifier
-          ::SSO::Client::PassportVerifier.new passport_id: passport_id, passport_state: 'refresh', passport_secret: chip_passport_secret, user_ip: ip, user_agent: agent, device_id: device_id
+          ::SSO::Client::PassportVerifier.new verifier_options
+        end
+
+        def verifier_options
+          {
+            passport_id: passport_id,
+            passport_state: 'refresh',
+            passport_secret: chip_passport_secret,
+            user_ip: ip,
+            user_agent: agent,
+            device_id: device_id,
+          }
         end
 
         def verification
@@ -78,7 +90,7 @@ module SSO
         end
 
         def signature_request
-          debug { "Verifying signature of #{request.request_method.inspect} #{request.path.inspect} #{request.params.inspect}"}
+          debug { "Verifying signature of #{request.request_method.inspect} #{request.path.inspect} #{request.params.inspect}" }
           ::Signature::Request.new request.request_method, request.path, request.params
         end
 
@@ -93,7 +105,7 @@ module SSO
         end
 
         def chip_decryption
-          debug { "Validating chip decryptability of raw chip #{chip.inspect}"}
+          debug { "Validating chip decryptability of raw chip #{chip.inspect}" }
           yield Operations.failure(:missing_chip, object: params) if chip.blank?
           yield Operations.failure(:missing_chip_key) unless chip_key
           yield Operations.failure(:missing_chip_iv) unless chip_iv
@@ -115,7 +127,7 @@ module SSO
             decipher.key = chip_key
             decipher.iv = chip_iv
             plaintext = decipher.update(chip_ciphertext) + decipher.final
-            logger.debug { "Decryptied chip plaintext #{plaintext.inspect} using key #{chip_key.inspect} and iv #{chip_iv.inspect} and ciphertext #{chip_ciphertext.inspect}"}
+            logger.debug { "Decryptied chip plaintext #{plaintext.inspect} using key #{chip_key.inspect} and iv #{chip_iv.inspect} and ciphertext #{chip_ciphertext.inspect}" }
             plaintext
           end
         end
@@ -130,12 +142,12 @@ module SSO
 
         def chip_belongs_to_passport?
           unless passport_id
-            debug { "Unknown passport_id" }
+            debug { 'Unknown passport_id' }
             return false
           end
 
           unless chip_passport_id
-            debug { "Unknown passport_id" }
+            debug { 'Unknown passport_id' }
             return false
           end
 
@@ -180,15 +192,11 @@ module SSO
           params['passport_chip']
         end
 
-        #def warden
-        #  request.env['warden']
-        #end
-
         def chip_digest
           ::OpenSSL::Cipher::AES256.new :CBC
         end
 
-        # TODO Use ActionDispatch remote IP or you might get the Load Balancer's IP instead :(
+        # TODO: Use ActionDispatch::Request#remote_ip
         def ip
           request.ip
         end

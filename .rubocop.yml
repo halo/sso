@@ -8,11 +8,11 @@ AllCops:
 
 # Yes, we have Kind::Of::Very::Long::Class::Names
 Metrics/ClassLength:
-  Max: 125
+  Max: 170
 
 # Look, I have a 11-inch screen and this works perfectly fine.
-Metrics/LineLength:
-  Max: 150
+# Metrics/LineLength:
+#   Max: 150
 
 # The trailing comma prevents brain cells from actually dying on copy-paste errors
 Style/TrailingComma:

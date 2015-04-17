@@ -12,8 +12,8 @@ group :red_green_refactor, halt_on_fail: true do
     dsl.watch_spec_files_for(ruby.lib_files)
   end
 
-  #guard :rubocop do
-  #  watch(/.+\.rb$/)
-  #  watch(/(?:.+\/)?\.rubocop.+\.yml$/) { |m| File.dirname(m[0]) }
-  #end
+  # guard :rubocop do
+  #   watch(/.+\.rb$/)
+  #   watch(/(?:.+\/)?\.rubocop.+\.yml$/) { |m| File.dirname(m[0]) }
+  # end
 end
