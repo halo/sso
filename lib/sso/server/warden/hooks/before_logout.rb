@@ -16,6 +16,7 @@ module SSO
                 new(user: user, warden: warden, options: options).call
               rescue => exception
                 ::SSO.config.exception_handler.call exception
+                nil
               end
             end
           end
@@ -30,6 +31,7 @@ module SSO
 
             error { 'Could not revoke the Passports.' } if revoking.failure?
             debug { 'Finished.' }
+            nil
           end
         end
       end

@@ -54,7 +54,7 @@ module SSO
       end
 
       def load_user!
-        @user = SSO.config.find_user_for_passport.call passport: self.reload
+        @user = SSO.config.find_user_for_passport.call passport: reload
       end
 
       def create_chip!

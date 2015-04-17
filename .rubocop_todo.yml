@@ -46,27 +46,13 @@ Metrics/ParameterLists:
 Metrics/PerceivedComplexity:
   Max: 8
 
-# Offense count: 1
-Style/AccessorMethodName:
-  Enabled: false
-
 # Offense count: 2
 # Configuration parameters: Keywords.
 Style/CommentAnnotation:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/CommentIndentation:
-  Enabled: false
-
 # Offense count: 24
 Style/Documentation:
-  Enabled: false
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/EmptyLines:
   Enabled: false
 
 # Offense count: 30
@@ -112,23 +98,6 @@ Style/NegatedIf:
 Style/NumericLiterals:
   MinDigits: 7
 
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: AllowMultipleReturnValues.
-Style/RedundantReturn:
-  Enabled: false
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/RedundantSelf:
-  Enabled: false
-
 # Offense count: 1
 Style/RescueModifier:
-  Enabled: false
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles, EnforcedStyleForEmptyBraces, SpaceBeforeBlockParameters.
-Style/SpaceInsideBlockBraces:
   Enabled: false

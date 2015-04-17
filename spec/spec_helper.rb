@@ -2,6 +2,7 @@ ENV['RACK_ENV'] = 'test'
 
 unless ENV['TRAVIS']
   require 'simplecov'
+  SimpleCov.add_filter '/spec/'
   SimpleCov.start
 end
 

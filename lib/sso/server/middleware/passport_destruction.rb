@@ -23,7 +23,7 @@ module SSO
           payload = { success: true, code: revocation.code }
           debug { "Revoked Passport with ID #{passport_id.inspect}" }
 
-          return [200, { 'Content-Type' => 'application/json' }, [payload.to_json]]
+          [200, { 'Content-Type' => 'application/json' }, [payload.to_json]]
         end
 
         def json_code(code)

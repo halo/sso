@@ -15,7 +15,7 @@ module SSO
       end
 
       def call
-        get_response { |failure| return failure }
+        fetch_response { |failure| return failure }
         interpret_response
 
       rescue JSON::ParserError
@@ -25,7 +25,7 @@ module SSO
 
       private
 
-      def get_response
+      def fetch_response
         yield Operations.failure(:server_unreachable, object: response)                   unless response.code == 200
         yield Operations.failure(:server_response_not_parseable, object: response)        unless parsed_response
         yield Operations.failure(:server_response_missing_success_flag, object: response) unless response_has_success_flag?

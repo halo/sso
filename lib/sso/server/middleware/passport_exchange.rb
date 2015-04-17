@@ -46,9 +46,9 @@ module SSO
           passport.create_chip!
 
           payload = { success: true, code: :here_is_your_passport, passport: passport.export }
-          debug { "Created Passport #{passport.id}, sending it including user #{passport.user.inspect}}"}
+          debug { "Created Passport #{passport.id}, sending it including user #{passport.user.inspect}}" }
 
-          return [200, { 'Content-Type' => 'application/json' }, [payload.to_json]]
+          [200, { 'Content-Type' => 'application/json' }, [payload.to_json]]
         end
 
         def json_code(code)

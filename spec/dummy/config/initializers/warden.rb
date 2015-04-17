@@ -24,7 +24,6 @@
   end
 end
 
-
 # POI
 Warden::Manager.after_authentication(&::SSO::Server::Warden::Hooks::AfterAuthentication.to_proc)
 Warden::Manager.before_logout(&::SSO::Server::Warden::Hooks::BeforeLogout.to_proc)
