@@ -4,6 +4,13 @@ module SSO
   module Test
     module Helpers
 
+      # Inspired by Warden::Spec::Helpers
+      def env_with_params(path = "/", params = {}, env = {})
+        method = params.delete(:method) || "GET"
+        env = { 'HTTP_VERSION' => '1.1', 'REQUEST_METHOD' => "#{method}" }.merge(env)
+        Rack::MockRequest.env_for "#{path}?#{Rack::Utils.build_query(params)}", env
+      end
+
       def redirect_httparty_to_rails_stack
         redirect_httparty :get
         redirect_httparty :post

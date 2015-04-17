@@ -29,6 +29,22 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true 
     allow(server_user).to receive(:tags).and_return %w(wears_glasses is_working_from_home never_gives_up)
   end
 
+  context 'invalid passport' do
+    let(:passport_secret) { SecureRandom.uuid }
+
+    it 'does not verify the passport' do
+      expect(client_passport).to_not be_verified
+      hook.call
+      expect(client_passport).to_not be_verified
+    end
+
+    it 'does not modify the passport' do
+      expect(client_passport).to_not be_modified
+      hook.call
+      expect(client_passport).to_not be_modified
+    end
+  end
+
   context 'user does not change' do
     it 'verifies the passport' do
       expect(client_passport).to_not be_verified

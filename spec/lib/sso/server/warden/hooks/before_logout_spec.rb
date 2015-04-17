@@ -29,7 +29,7 @@ RSpec.describe SSO::Server::Warden::Hooks::BeforeLogout do
     it 'revokes the passport' do
       calling
       passport.reload
-      expect(passport.revoked_at).to eq Time.now
+      expect(passport.revoked_at.to_i).to eq Time.now.to_i
       expect(passport.revoke_reason).to eq 'logout'
     end
 
