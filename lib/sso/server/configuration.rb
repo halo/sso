@@ -92,7 +92,7 @@ module SSO
     end
 
     def default_human_readable_location_for_ip
-      proc do
+      proc do |ip|
         'Unknown'
       end
     end

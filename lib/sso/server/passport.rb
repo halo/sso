@@ -113,7 +113,7 @@ module SSO
       end
 
       def update_location
-        location_name = ::SSO::Server::Geolocations.human_readable_location_for_ip ip
+        location_name = ::SSO.config.human_readable_location_for_ip.call(ip)
         debug { "Updating geolocation for #{ip} which is #{location_name}" }
         self.location = location_name
       end
