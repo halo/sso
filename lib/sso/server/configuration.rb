@@ -57,7 +57,10 @@ module SSO
     def environment
       @environment ||= default_environment
     end
-    attr_writer :environment
+
+    def environment=(new_environment)
+      @environment = new_environment.to_s
+    end
 
     private
 
