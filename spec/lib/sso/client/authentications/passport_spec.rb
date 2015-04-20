@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe SSO::Client::Authentications::Passport, type: :request, db: true do
+RSpec.describe SSO::Client::Authentications::Passport, type: :request, db: true, reveal_exceptions: true do
 
   # Untrusted Client
   let(:request_method)    { 'GET' }
@@ -31,12 +31,15 @@ RSpec.describe SSO::Client::Authentications::Passport, type: :request, db: true 
   let(:passport_chip)   { server_passport.chip! }
 
   # Server
+  let(:oauth_client)     { create :outsider_doorkeeper_application }
   let(:insider)          { false }
   let(:server_user)      { create :user, name: 'Emily', tags: %i(cool nice) }
   let!(:server_passport) { create :passport, user: server_user, owner_id: server_user.id, ip: ip, agent: agent, insider: insider }
 
   before do
     SSO.config.passport_chip_key = SecureRandom.hex
+    SSO.config.oauth_client_id = oauth_client.id
+    SSO.config.oauth_client_secret = oauth_client.secret
   end
 
   context 'no changes' do
@@ -57,15 +60,25 @@ RSpec.describe SSO::Client::Authentications::Passport, type: :request, db: true 
         expect(passport).to be_modified
       end
 
-      it 'tracks the immediate request IP' do
-        expect(server_passport.reload.ip).to eq '127.0.0.1'
-      end
-
       it 'attaches the user attributes to the passport' do
         expect(passport.user).to be_instance_of Hash
         expect(passport.user['name']).to eq 'Emily'
         expect(passport.user['email']).to eq 'emily@example.com'
         expect(passport.user['tags'].sort).to eq %w(cool is_working_from_home nice).sort
+      end
+
+      context 'outsider oauth client' do
+        it 'tracks the immediate request IP' do
+          expect(server_passport.reload.ip).to eq '127.0.0.1'
+        end
+      end
+
+      context 'insider oauth client' do
+        let(:oauth_client) { create :insider_doorkeeper_application }
+
+        it 'tracks the untrusted client IP' do
+          expect(server_passport.reload.ip).to eq ip
+        end
       end
     end
 

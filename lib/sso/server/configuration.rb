@@ -37,6 +37,16 @@ module SSO
     end
     attr_writer :passport_verification_timeout_ms
 
+    def oauth_client_id
+      @oauth_client_id || fail('You need to configure the oauth_client_id, see SSO::Configuration for more info.')
+    end
+    attr_writer :oauth_client_id
+
+    def oauth_client_secret
+      @oauth_client_secret || fail('You need to configure the oauth_client_secret, see SSO::Configuration for more info.')
+    end
+    attr_writer :oauth_client_secret
+
     # Both
 
     def exception_handler
@@ -89,7 +99,7 @@ module SSO
       proc do |exception|
         return unless ::SSO.config.logger
         ::SSO.config.logger.error(self.class) do
-          "An internal error occured #{exception.class.name} #{exception.message} #{exception.backtrace[0..5].join(' ') if exception.backtrace}"
+          "An internal error occurred #{exception.class.name} #{exception.message} #{exception.backtrace[0..5].join(' ') if exception.backtrace}"
         end
       end
     end

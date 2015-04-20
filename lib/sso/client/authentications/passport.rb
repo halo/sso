@@ -127,7 +127,7 @@ module SSO
             decipher.key = chip_key
             decipher.iv = chip_iv
             plaintext = decipher.update(chip_ciphertext) + decipher.final
-            logger.debug { "Decryptied chip plaintext #{plaintext.inspect} using key #{chip_key.inspect} and iv #{chip_iv.inspect} and ciphertext #{chip_ciphertext.inspect}" }
+            logger.debug { "Decrypted chip plaintext #{plaintext.inspect} using key #{chip_key.inspect} and iv #{chip_iv.inspect} and ciphertext #{chip_ciphertext.inspect}" }
             plaintext
           end
         end

@@ -44,8 +44,16 @@ RSpec.configure do |config|
     DatabaseCleaner.start
   end
 
+  config.before :each, reveal_exceptions: true do
+    SSO.config.exception_handler = proc { |exception| fail exception }
+  end
+
   config.after :each do
     Timecop.return
+    SSO.config.exception_handler = nil
+    SSO.config.passport_chip_key = nil
+    SSO.config.oauth_client_id = nil
+    SSO.config.oauth_client_secret = nil
   end
 
   config.after :each, db: true do

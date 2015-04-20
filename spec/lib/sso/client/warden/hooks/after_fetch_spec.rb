@@ -27,6 +27,8 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true 
     # The server dynamically injects some tags. In order to calculate the user state correctly in our test setup,
     # We need to "simulate" what the tags will look like once the server modified them. No big problem.
     allow(server_user).to receive(:tags).and_return %w(wears_glasses is_working_from_home never_gives_up)
+    SSO.config.oauth_client_id = SecureRandom.hex
+    SSO.config.oauth_client_secret = SecureRandom.hex
   end
 
   context 'invalid passport' do

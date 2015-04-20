@@ -537,8 +537,10 @@ When `Bouncer` handed out the Passport to the `iPhone`, it performed the followi
 
 ```ruby
 # Pseudo code of Bouncer setting the chip of the Passport
-secret = "something only Bouncer, Alpha and Beta know (i.e. trusted clients)"
-passport.chip = AES.encrypt(passport.secret).with(secret)
+shared_secret = "something only Bouncer, Alpha and Beta know (i.e. trusted clients)"
+# Including the ID in the plaintext ensures the chip is only valid for this Passport
+plaintext = [passport.id, passport.secret].join('|')
+passport.chip = AES.encrypt(plaintext).with(shared_secret)
 ```
 
 The `iPhone` simply passed on the `chip` to `Alpha`.

@@ -43,28 +43,7 @@ module SSO
       def self.update_activity(passport_id:, request:)
         record = find_valid_passport(passport_id) { |failure| return failure }
 
-        immediate_ip = request.respond_to?(:remote_ip) ? request.remote_ip : request.ip
-        if record.insider?
-          proxied_ip = request['ip']
-          unless proxied_ip
-            warn { "There should have been a proxied IP param, but there was none. I will use the immediare IP #{immediate_ip} now." }
-            proxied_ip = immediate_ip
-          end
-          attributes = { ip: proxied_ip, agent: request['agent'], device: request['device_id'] }
-        else
-          attributes = { ip: immediate_ip, agent: request.user_agent, device: request.params['device_id'] }
-        end
-        attributes.merge! activity_at: Time.now
-
-        record.stamps ||= {}  # <- Not thread-safe, this may potentially delete all existing stamps, I guess
-        record.stamps[attributes[:ip]] = Time.now.to_i
-
-        debug { "Updating activity of #{record.insider? ? :insider : :outsider} Passport #{passport_id.inspect} using IP #{attributes[:ip]} agent #{attributes[:agent]} and device #{attributes[:device]}" }
-        if record.update_attributes(attributes)
-          Operations.success :passport_metadata_updated
-        else
-          Operations.failure :could_not_update_passport_activity, object: record.errors.to_hash
-        end
+        ::SSO::Server::Passports::Activity.new(passport: record, request: request).call
       end
 
       def self.register_authorization_grant(passport_id:, token:)

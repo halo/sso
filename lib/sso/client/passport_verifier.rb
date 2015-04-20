@@ -66,7 +66,25 @@ module SSO
       end
 
       def params
-        { ip: user_ip, agent: user_agent, device_id: device_id, state: passport_state }
+        result = { ip: user_ip, agent: user_agent, device_id: device_id, state: passport_state }
+        result.merge! insider_id: insider_id, insider_signature: insider_signature
+        result
+      end
+
+      def insider_id
+        ::SSO.config.oauth_client_id
+      end
+
+      def insider_secret
+        ::SSO.config.oauth_client_secret
+      end
+
+      def insider_signature
+        ::OpenSSL::HMAC.hexdigest signature_digest, insider_secret, user_ip
+      end
+
+      def signature_digest
+        OpenSSL::Digest.new 'sha1'
       end
 
       def token
