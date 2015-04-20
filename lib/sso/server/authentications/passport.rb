@@ -54,7 +54,6 @@ module SSO
           yield Operations.failure :passport_not_found   if passport.blank?
           yield Operations.failure :passport_revoked     if passport.invalid?
           debug { 'Arguments are fine.' }
-          #yield Operations.failure :user_not_encapsulated if passport.user.blank?
           Operations.success :arguments_are_valid
         end
 
@@ -83,7 +82,8 @@ module SSO
         end
 
         def passport!
-          return unless record = backend.find_by_id(passport_id)
+          record = backend.find_by_id(passport_id)
+          return unless record
           debug { "Successfully loaded Passport #{passport_id} from database." }
           record
         end

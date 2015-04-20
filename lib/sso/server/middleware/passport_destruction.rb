@@ -11,7 +11,7 @@ module SSO
         def call(env)
           request = Rack::Request.new(env)
 
-          if !(request.delete? && request.path.start_with?(passports_path))
+          unless request.delete? && request.path.start_with?(passports_path)
             debug { "I'm not interested in this #{request.request_method.inspect} request to #{request.path.inspect} I only care for DELETE #{passports_path.inspect}" }
             return @app.call(env)
           end

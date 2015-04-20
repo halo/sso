@@ -10,10 +10,19 @@ AllCops:
 Metrics/ClassLength:
   Max: 170
 
-# Look, I have a 11-inch screen and this works perfectly fine.
+# On an 11-inch screen this works perfectly fine.
 # Metrics/LineLength:
 #   Max: 150
 
-# The trailing comma prevents brain cells from actually dying on copy-paste errors
+# The trailing comma prevents brain cells from dying on copy-paste errors
 Style/TrailingComma:
   Enabled: false
+
+# I'm not that picky. An empty line can even increase readability
+Style/EmptyLinesAroundBlockBody:
+  Enabled: false
+Style/EmptyLinesAroundClassBody:
+  Enabled: false
+Style/EmptyLinesAroundModuleBody:
+  Enabled: false
+

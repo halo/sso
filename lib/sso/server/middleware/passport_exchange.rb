@@ -12,10 +12,8 @@ module SSO
 
         def call(env)
           request = Rack::Request.new(env)
-          remote_ip = request.env['action_dispatch.remote_ip'].to_s
-          device_id = request.params['device_id']
 
-          if !(request.post? && request.path == passports_path)
+          unless request.post? && request.path == passports_path
             debug { "I'm not interested in this #{request.request_method.inspect} request to #{request.path.inspect} I only care for POST #{passports_path.inspect}" }
             return @app.call(env)
           end
@@ -24,13 +22,8 @@ module SSO
           debug { "Detected incoming Passport creation request for access token #{token.inspect}" }
           access_token = ::Doorkeeper::AccessToken.find_by_token token
 
-          unless access_token
-            return json_code :access_token_not_found
-          end
-
-          unless access_token.valid?
-            return json_code :access_token_invalid
-          end
+          return json_code :access_token_not_found unless access_token
+          return json_code :access_token_invalid unless access_token.valid?
 
           finding = ::SSO::Server::Passports.find_by_access_token_id(access_token.id)
           if finding.failure?

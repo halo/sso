@@ -52,7 +52,7 @@ module SSO
       def received_passport
         ::SSO::Client::Passport.new received_passport_attributes
 
-      rescue ArgumentError => exception
+      rescue ArgumentError
         error { "Could not instantiate Passport from serialized response #{received_passport_attributes.inspect}" }
         raise
       end
@@ -107,7 +107,7 @@ module SSO
         (timeout_in_milliseconds / 1000).round 2
       end
 
-      # TODO Needs to be configurable
+      # TODO: Needs to be configurable
       def path
         OmniAuth::Strategies::SSO.passports_path
       end

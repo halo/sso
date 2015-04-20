@@ -71,7 +71,7 @@ module SSO
           ciphertext = cipher.update chip_plaintext
           ciphertext << cipher.final
           debug { "The Passport chip plaintext #{chip_plaintext.inspect} was encrypted using key #{chip_key.inspect} and IV #{chip_iv.inspect} and resultet in ciphertext #{ciphertext.inspect}" }
-          chip = [Base64.encode64(ciphertext).strip(), Base64.encode64(chip_iv).strip()].join('|')
+          chip = [Base64.encode64(ciphertext).strip, Base64.encode64(chip_iv).strip].join('|')
           logger.debug { "Augmented passport #{id.inspect} with chip #{chip.inspect}" }
           chip
         end

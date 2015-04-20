@@ -46,7 +46,8 @@ module SSO
             return
           end
 
-          unless application = ::Doorkeeper::Application.find_by_id(insider_id)
+          application = ::Doorkeeper::Application.find_by_id(insider_id)
+          unless application
             warn { 'The insider_id param does not correspond to an existing Doorkeeper Application' }
             return
           end
