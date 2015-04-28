@@ -27,7 +27,7 @@ module SSO
         end
 
         def json_code(code)
-          [200, { 'Content-Type' => 'application/json' }, [{ success: true, code: code }.to_json]]
+          [200, { 'Content-Type' => 'application/json' }, [{ success: false, code: code }.to_json]]
         end
 
         def passports_path

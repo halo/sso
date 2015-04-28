@@ -18,18 +18,22 @@ module SSO
         fetch_response { |failure| return failure }
         interpret_response
 
-      rescue JSON::ParserError
+      rescue ::JSON::ParserError
         error { 'SSO Server response is not valid JSON.' }
         error { response.inspect }
+        Operations.failure :server_response_not_parseable, object: response
+      end
+
+      def human_readable_timeout_in_ms
+        "#{timeout_in_milliseconds}ms"
       end
 
       private
 
       def fetch_response
-        yield Operations.failure(:server_unreachable, object: response)                   unless response.code == 200
+        yield Operations.failure(:server_unreachable, object: response)                   unless response.code.to_s == '200'
         yield Operations.failure(:server_response_not_parseable, object: response)        unless parsed_response
         yield Operations.failure(:server_response_missing_success_flag, object: response) unless response_has_success_flag?
-        yield Operations.failure(:server_response_unsuccessful, object: response)         unless parsed_response['success'].to_s == 'true'
         Operations.success :server_response_looks_legit
       end
 
@@ -130,7 +134,7 @@ module SSO
 
       def response!
         debug { "Fetching Passport from #{endpoint.inspect}" }
-        benchmark 'Passport authorization request' do
+        benchmark(name: 'Passport verification request', metric: 'client.passport.verification.duration') do
           ::HTTParty.get endpoint, timeout: timeout_in_seconds, query: query_params, headers: { 'Accept' => 'application/json' }
         end
       end
@@ -140,7 +144,7 @@ module SSO
       end
 
       def response_has_success_flag?
-        parsed_response && parsed_response.respond_to?(:key?) && parsed_response.key?('success')
+        parsed_response && parsed_response.respond_to?(:key?) && (parsed_response.key?('success') || parsed_response.key?(:success))
       end
 
     end

@@ -85,7 +85,7 @@ module SSO
         end
 
         def failure_rack_array
-          payload = { success: true, code: :passport_verification_failed }
+          payload = { success: false, code: :passport_verification_failed }
           [200, { 'Content-Type' => 'application/json' }, [payload.to_json]]
         end
 
@@ -121,7 +121,7 @@ module SSO
         end
 
         def decrypt_chip!
-          benchmark 'Passport chip decryption' do
+          benchmark(name: 'Passport chip decryption') do
             decipher = chip_digest
             decipher.decrypt
             decipher.key = chip_key

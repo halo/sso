@@ -2,7 +2,7 @@ class SessionsController < ApplicationController
   include ::SSO::Logging
   delegate :logout, to: :warden
 
-  before_action :not_json, only: [:new]
+  before_action :prevent_json, only: [:new]
 
   # POI
   def new
@@ -27,8 +27,9 @@ class SessionsController < ApplicationController
 
   private
 
-  def not_json
-    return unless request.format == :json
+  def prevent_json
+    return unless request.format.to_sym == :json
+    warn { "This request is asking for JSON where it shouldn't" }
     render status: :unauthorized, json: { status: :error, code: :authentication_failed }
   end
 

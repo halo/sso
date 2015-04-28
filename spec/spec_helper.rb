@@ -34,6 +34,11 @@ RSpec.configure do |config|
   config.before :suite do
     DatabaseCleaner.strategy = :transaction
     DatabaseCleaner.clean_with :truncation
+    SSO.config.exception_handler = nil
+    SSO.config.passport_chip_key = nil
+    SSO.config.oauth_client_id = nil
+    SSO.config.oauth_client_secret = nil
+    SSO.config.metric = ::SSO::Test::Helpers.meter
   end
 
   config.before :each do
@@ -46,6 +51,10 @@ RSpec.configure do |config|
 
   config.before :each, reveal_exceptions: true do
     SSO.config.exception_handler = proc { |exception| fail exception }
+  end
+
+  config.before :each, stub_benchmarks: true do
+    stub_benchmarks
   end
 
   config.after :each do

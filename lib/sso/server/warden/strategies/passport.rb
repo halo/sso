@@ -20,8 +20,8 @@ module SSO
               debug { "Responding with #{authentication.object}" }
               custom! authentication.object
             else
-              debug { 'Authentication from Passport failed.' }
-              fail authentication.code
+              debug { 'Authentication from Passport on Server failed.' }
+              custom! authentication.object
             end
 
           rescue => exception
@@ -29,7 +29,7 @@ module SSO
           end
 
           def passport_authentication
-            benchmark 'Passport verification' do
+            benchmark(name: 'Passport verification') do
               ::SSO::Server::Authentications::Passport.new(request).authenticate
             end
           end

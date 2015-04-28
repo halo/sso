@@ -12,6 +12,7 @@ module SSO
         class AfterFetch
           include ::SSO::Logging
           include ::SSO::Benchmarking
+          include ::SSO::Meter
 
           attr_reader :passport, :warden, :options
           delegate :request, to: :warden
@@ -31,12 +32,14 @@ module SSO
             return unless passport.is_a?(::SSO::Client::Passport)
             verify
 
-          rescue Timeout::Error
+          rescue ::Timeout::Error
             error { 'SSO Server timed out. Continuing with last known authentication/authorization...' }
-            # meter status: :timeout, scope: scope, passport_id: user.passport_id, timeout_ms: human_readable_timeout_in_ms
+            meter :timeout, timeout_ms: verifier.human_readable_timeout_in_ms
+            Operations.failure :server_request_timed_out
 
           rescue => exception
             ::SSO.config.exception_handler.call exception
+            Operations.failure :client_exception_caught
           end
 
           private
@@ -53,14 +56,17 @@ module SSO
             verification.code
           end
 
+          def verification_object
+            verification.object
+          end
+
           def verify
             debug { "Validating Passport #{passport.id.inspect} of logged in #{passport.user.class} in scope #{warden_scope.inspect}" }
 
             case verification_code
             when :server_unreachable                    then server_unreachable!
             when :server_response_not_parseable         then server_response_not_parseable!
-            when :server_response_missing_success_flag! then server_response_missing_success_flag!
-            when :server_response_unsuccessful!         then server_response_unsuccessful!
+            when :server_response_missing_success_flag  then server_response_missing_success_flag!
             when :passport_valid                        then passport_valid!
             when :passport_valid_and_modified           then passport_valid_and_modified!(verification.object)
             when :passport_invalid                      then passport_invalid!
@@ -74,39 +80,54 @@ module SSO
             passport.modified!
             passport.user = modified_passport.user
             passport.state = modified_passport.state
-            # meter status: :valid, passport_id: user.passport_id
+            meter :valid_and_modified
+            Operations.success :valid_and_modified
           end
 
           def passport_valid!
             debug { 'Valid passport, no changes' }
             passport.verified!
-            # meter status: :valid, passport_id: user.passport_id
+            meter :valid
+            Operations.success :valid
           end
 
           def passport_invalid!
             info { 'Your Passport is not valid any more.' }
             warden.logout warden_scope
-            # meter status: :invalid, passport_id: user.passport_id
+            meter :invalid
+            Operations.failure :invalid
           end
 
           def server_unreachable!
-            error { "SSO Server responded with an unexpected HTTP status code (#{response.code.inspect} instead of 200)." }
+            error { "SSO Server responded with an unexpected HTTP status code (#{verification_code.inspect} instead of 200). #{verification_object.inspect}" }
+            meter :server_unreachable
+            Operations.failure :server_unreachable
           end
 
           def server_response_missing_success_flag!
             error { 'SSO Server response did not include the expected success flag.' }
+            meter :server_response_missing_success_flag
+            Operations.failure :server_response_missing_success_flag
           end
 
           def unexpected_server_response_status!
             error { "SSO Server response did not include a known passport status code. #{verification_code.inspect}" }
+            meter :unexpected_server_response_status
+            Operations.failure :unexpected_server_response_status
           end
 
           def server_response_not_parseable!
             error { 'SSO Server response could not be parsed at all.' }
+            meter :server_response_not_parseable
+            Operations.failure :server_response_not_parseable
           end
 
-          def meter(*_)
-            # This will be a hook for e.g. statistics, benchmarking, etc, measure everything
+          def meter(key, data = {})
+            options[:key] = "client.warden.hooks.after_fetch.#{key}"
+            options[:tags] = { scope: warden_scope }
+            data[:passport_id] = passport.id
+            options[:data] = data
+            track options
           end
 
           # TODO: Use ActionDispatch remote IP or you might get the Load Balancer's IP instead :(

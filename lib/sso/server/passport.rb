@@ -46,7 +46,7 @@ module SSO
       end
 
       def state!
-        result = benchmark 'Passport user state calculation' do
+        result = benchmark(name: 'Passport user state calculation') do
           OpenSSL::HMAC.hexdigest user_state_digest, user_state_key, user_state_base
         end
         debug { "The user state is #{result.inspect}" }
@@ -62,7 +62,7 @@ module SSO
       end
 
       def chip!
-        benchmark 'Passport chip encryption' do
+        benchmark(name: 'Passport chip encryption') do
           ensure_secret
           cipher = chip_digest
           cipher.encrypt

@@ -15,7 +15,7 @@ module SSO
             result
           else
             # TODO: Prevent Flooding here.
-            debug { "The Passport authentication failed: #{result.code}" }
+            debug { "The Server Passport authentication failed: #{result.code}" }
             Operations.failure :passport_authentication_failed, object: failure_rack_array
           end
         end
@@ -73,7 +73,7 @@ module SSO
         # all passports simply because a load balancer is pointing to the wrong Rails application or something.
         #
         def failure_rack_array
-          payload = { success: true, code: :passport_invalid }
+          payload = { success: false, code: :passport_invalid }
           [200, { 'Content-Type' => 'application/json' }, [payload.to_json]]
         end
 

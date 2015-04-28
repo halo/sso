@@ -19,16 +19,16 @@ module SSO
           end
 
           token = request.params['access_token']
-          debug { "Detected incoming Passport creation request for access token #{token.inspect}" }
+          debug { "Detected incoming Passport exchange request for access token #{token.inspect}" }
           access_token = ::Doorkeeper::AccessToken.find_by_token token
 
-          return json_code :access_token_not_found unless access_token
-          return json_code :access_token_invalid unless access_token.valid?
+          return json_error :access_token_not_found unless access_token
+          return json_error :access_token_invalid unless access_token.valid?
 
           finding = ::SSO::Server::Passports.find_by_access_token_id(access_token.id)
           if finding.failure?
             # This should never happen. Every Access Token should be connected to a Passport.
-            return json_code :passport_not_found
+            return json_error :passport_not_found
           end
           passport = finding.object
 
@@ -44,8 +44,8 @@ module SSO
           [200, { 'Content-Type' => 'application/json' }, [payload.to_json]]
         end
 
-        def json_code(code)
-          [200, { 'Content-Type' => 'application/json' }, [{ success: true, code: code }.to_json]]
+        def json_error(code)
+          [200, { 'Content-Type' => 'application/json' }, [{ success: false, code: code }.to_json]]
         end
 
         def passports_path

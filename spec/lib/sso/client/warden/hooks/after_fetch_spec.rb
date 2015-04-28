@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true do
+RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true, stub_benchmarks: true do
 
   # Client side
   let(:warden_env)      { {} }
@@ -10,6 +10,7 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true 
   let(:hook)            { described_class.new passport: client_passport, warden: warden, options: {} }
   let(:client_user)     { double :client_user, name: 'Good old client user' }
   let(:client_passport) { ::SSO::Client::Passport.new id: passport_id, secret: passport_secret, state: passport_state, user: client_user }
+  let(:operation)       { hook.call }
 
   # Shared
   let!(:oauth_app)      { create :outsider_doorkeeper_application }
@@ -34,6 +35,10 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true 
   context 'invalid passport' do
     let(:passport_secret) { SecureRandom.uuid }
 
+    before do
+      expect(warden).to receive :logout
+    end
+
     it 'does not verify the passport' do
       expect(client_passport).to_not be_verified
       hook.call
@@ -44,6 +49,20 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true 
       expect(client_passport).to_not be_modified
       hook.call
       expect(client_passport).to_not be_modified
+    end
+
+    it 'fails' do
+      expect(operation).to be_failure
+    end
+
+    it 'has a useful error code' do
+      expect(operation.code).to eq :invalid
+    end
+
+    it 'meters the invalid passport' do
+      expect(::SSO.config.metric).to receive(:call).with type: :histogram, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
+      expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.invalid', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
+      hook.call
     end
   end
 
@@ -63,6 +82,20 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true 
     it 'does not modify the encapsulated user' do
       hook.call
       expect(client_passport.user.name).to eq 'Good old client user'
+    end
+
+    it 'succeeds' do
+      expect(operation).to be_success
+    end
+
+    it 'has a useful error code' do
+      expect(operation.code).to eq :valid
+    end
+
+    it 'meters the invalid passport' do
+      expect(::SSO.config.metric).to receive(:call).with type: :histogram, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
+      expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.valid', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
+      hook.call
     end
   end
 
@@ -88,6 +121,20 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true 
       hook.call
       expect(client_passport.user.name).to eq 'Good old client user'
     end
+
+    it 'succeeds' do
+      expect(operation).to be_success
+    end
+
+    it 'has a useful error code' do
+      expect(operation.code).to eq :valid
+    end
+
+    it 'meters the invalid passport' do
+      expect(::SSO.config.metric).to receive(:call).with type: :histogram, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
+      expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.valid', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
+      hook.call
+    end
   end
 
   context 'user attribute changed which results in a new state digest' do
@@ -111,6 +158,148 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true 
     it 'updates the client user to reflect the server user' do
       hook.call
       expect(client_passport.user['name']).to eq server_user.name
+    end
+
+    it 'succeeds' do
+      expect(operation).to be_success
+    end
+
+    it 'has a useful error code' do
+      expect(operation.code).to eq :valid_and_modified
+    end
+
+    it 'meters the invalid passport' do
+      expect(::SSO.config.metric).to receive(:call).with type: :histogram, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
+      expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.valid_and_modified', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
+      hook.call
+    end
+  end
+
+  context 'server request times out' do
+    before do
+      expect(::HTTParty).to receive(:get).and_raise ::Net::ReadTimeout
+    end
+
+    it 'fails' do
+      expect(operation).to be_failure
+    end
+
+    it 'has a useful error code' do
+      expect(operation.code).to eq :server_request_timed_out
+    end
+
+    it 'meters the timeout' do
+      expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.timeout', value: 1, tags: { scope: nil }, data: { timeout_ms: '100ms', passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
+      hook.call
+    end
+  end
+
+  context 'server unreachable' do
+    before do
+      expect(::HTTParty).to receive(:get).and_return double(:response, code: 302)
+    end
+
+    it 'fails' do
+      expect(operation).to be_failure
+    end
+
+    it 'has a useful error code' do
+      expect(operation.code).to eq :server_unreachable
+    end
+
+    it 'meters the timeout' do
+      expect(::SSO.config.metric).to receive(:call).with type: :histogram, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
+      expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.server_unreachable', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
+      hook.call
+    end
+  end
+
+  context 'server response not parseable' do
+    let(:response) { double :response, code: 200 }
+
+    before do
+      expect(::HTTParty).to receive(:get).and_return response
+      allow(response).to receive(:parsed_response).and_raise ::JSON::ParserError
+    end
+
+    it 'fails' do
+      expect(operation).to be_failure
+    end
+
+    it 'has a useful error code' do
+      expect(operation.code).to eq :server_response_not_parseable
+    end
+
+    it 'meters the timeout' do
+      expect(::SSO.config.metric).to receive(:call).with type: :histogram, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
+      expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.server_response_not_parseable', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
+      hook.call
+    end
+  end
+
+  context 'server response has no success flag at all' do
+    let(:response) { double :response, code: 200, parsed_response: { some: :thing } }
+
+    before do
+      expect(::HTTParty).to receive(:get).and_return response
+    end
+
+    it 'fails' do
+      expect(operation).to be_failure
+    end
+
+    it 'has a useful error code' do
+      expect(operation.code).to eq :server_response_missing_success_flag
+    end
+
+    it 'meters the timeout' do
+      expect(::SSO.config.metric).to receive(:call).with type: :histogram, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
+      expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.server_response_missing_success_flag', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
+      hook.call
+    end
+  end
+
+  context 'server behaves weirdly' do
+    let(:response) { double :response, code: 200, parsed_response: { success: true } }
+
+    before do
+      expect(::HTTParty).to receive(:get).and_return response
+    end
+
+    it 'fails' do
+      expect(operation).to be_failure
+    end
+
+    it 'has a useful error code' do
+      expect(operation.code).to eq :unexpected_server_response_status
+    end
+
+    it 'meters the timeout' do
+      expect(::SSO.config.metric).to receive(:call).with type: :histogram, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
+      expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.unexpected_server_response_status', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
+      hook.call
+    end
+  end
+
+  context 'client-side exception' do
+    before do
+      expect(::HTTParty).to receive(:get).and_raise ArgumentError
+    end
+
+    it 'fails' do
+      expect(operation).to be_failure
+    end
+
+    it 'has a useful error code' do
+      expect(operation.code).to eq :client_exception_caught
+    end
+  end
+
+  describe '.activate' do
+
+    it 'proxies the options to warden' do
+      expect(::Warden::Manager).to receive(:after_fetch).with(scope: :insider).and_yield :passport, :warden, :options
+      described_class.activate scope: :insider
     end
   end
 

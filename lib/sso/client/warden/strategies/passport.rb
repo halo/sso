@@ -21,7 +21,7 @@ module SSO
               debug { "Persisting trusted Passport #{authentication.object.inspect}" }
               success! authentication.object
             else
-              debug { 'Authentication from Passport failed.' }
+              debug { 'Authentication from Passport on Client failed.' }
               debug { "Responding with #{authentication.object.inspect}" }
               custom! authentication.object
             end
@@ -31,7 +31,7 @@ module SSO
           end
 
           def passport_authentication
-            benchmark 'Passport proxy verification' do
+            benchmark(name: 'Passport proxy verification request', metric: 'client.passport.verification') do
               ::SSO::Client::Authentications::Passport.new(request).authenticate
             end
           end

@@ -2,6 +2,7 @@ require 'logger'
 
 module SSO
   class Configuration
+    include ::SSO::Logging
 
     # Server
 
@@ -53,6 +54,11 @@ module SSO
       @exception_handler || default_exception_handler
     end
     attr_writer :exception_handler
+
+    def metric
+      @metric || default_metric
+    end
+    attr_writer :metric
 
     def passport_chip_key
       @passport_chip_key || fail('You need to configure a secret passport_chip_key, see SSO::Configuration for more info.')
@@ -110,8 +116,14 @@ module SSO
       end
     end
 
+    def default_metric
+      proc do |type:, key:, value:, tags:, data:|
+        debug { "Measuring #{type.inspect} with key #{key.inspect} and value #{value.inspect} and tags #{tags} and data #{data}" }
+      end
+    end
+
     def default_session_backend
-      fail('You need to configure session_backend, see SSO::Configuration for more info.') unless %w(developmen test).include?(environment)
+      fail('You need to configure session_backend, see SSO::Configuration for more info.') unless %w(development test).include?(environment)
     end
 
     def default_passport_verification_timeout_ms

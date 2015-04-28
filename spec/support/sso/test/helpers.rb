@@ -4,6 +4,17 @@ module SSO
   module Test
     module Helpers
 
+      def self.meter
+        proc {}
+      end
+
+      def stub_benchmarks
+        allow(Benchmark).to receive(:realtime) do |&block|
+          block.call
+          42
+        end
+      end
+
       # Inspired by Warden::Spec::Helpers
       def env_with_params(path = '/', params = {}, env = {})
         method = params.delete(:method) || 'GET'

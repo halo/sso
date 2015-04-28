@@ -52,7 +52,7 @@ RSpec.describe SSO::Client::Warden::Strategies::Passport do
         expect(rack_array.size).to eq 3
         expect(rack_array[0]).to eq 200
         expect(rack_array[1]).to eq 'Content-Type' => 'application/json'
-        expect(rack_array[2]).to eq ['{"success":true,"code":"passport_verification_failed"}']
+        expect(rack_array[2]).to eq ['{"success":false,"code":"passport_verification_failed"}']
       end
       strategy.authenticate!
     end
