@@ -7,7 +7,8 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true,
   let(:client_params)   { { device_id: 'unique device identifier' } }
   let(:warden_request)  { double :warden_request, ip: ip, user_agent: agent, params: client_params, env: warden_env }
   let(:warden)          { double :warden, request: warden_request }
-  let(:hook)            { described_class.new passport: client_passport, warden: warden, options: {} }
+  let(:hook)            { described_class.new passport: client_passport, warden: warden, options: { scope: warden_scope } }
+  let(:warden_scope)    {}
   let(:client_user)     { double :client_user, name: 'Good old client user' }
   let(:client_passport) { ::SSO::Client::Passport.new id: passport_id, secret: passport_secret, state: passport_state, user: client_user }
   let(:operation)       { hook.call }
@@ -60,9 +61,23 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true,
     end
 
     it 'meters the invalid passport' do
+      expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.server.warden.strategies.passport.passport_authentication_failed', value: 1, tags: nil, data: { caller: 'SSO::Server::Warden::Strategies::Passport' }
+      expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.server.warden.strategies.passport.authentication', value: 1, tags: nil, data: { caller: 'SSO::Server::Warden::Strategies::Passport' }
       expect(::SSO.config.metric).to receive(:call).with type: :timing, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
       expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.invalid', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
       hook.call
+    end
+
+    context 'with warden scope' do
+      let(:warden_scope) { :vip }
+
+      it 'meters the invalid passport with the scope' do
+        expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.server.warden.strategies.passport.passport_authentication_failed', value: 1, tags: nil, data: { caller: 'SSO::Server::Warden::Strategies::Passport' }
+        expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.server.warden.strategies.passport.authentication', value: 1, tags: nil, data: { caller: 'SSO::Server::Warden::Strategies::Passport' }
+        expect(::SSO.config.metric).to receive(:call).with type: :timing, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
+        expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.invalid', value: 1, tags: { scope: :vip }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
+        hook.call
+      end
     end
   end
 
@@ -93,6 +108,8 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true,
     end
 
     it 'meters the invalid passport' do
+      expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.server.warden.strategies.passport.signature_approved_no_changes', value: 1, tags: nil, data: { caller: 'SSO::Server::Warden::Strategies::Passport' }
+      expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.server.warden.strategies.passport.authentication', value: 1, tags: nil, data: { caller: 'SSO::Server::Warden::Strategies::Passport' }
       expect(::SSO.config.metric).to receive(:call).with type: :timing, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
       expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.valid', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
       hook.call
@@ -131,6 +148,8 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true,
     end
 
     it 'meters the invalid passport' do
+      expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.server.warden.strategies.passport.signature_approved_no_changes', value: 1, tags: nil, data: { caller: 'SSO::Server::Warden::Strategies::Passport' }
+      expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.server.warden.strategies.passport.authentication', value: 1, tags: nil, data: { caller: 'SSO::Server::Warden::Strategies::Passport' }
       expect(::SSO.config.metric).to receive(:call).with type: :timing, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
       expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.valid', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
       hook.call
@@ -169,6 +188,8 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true,
     end
 
     it 'meters the invalid passport' do
+      expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.server.warden.strategies.passport.signature_approved_state_changed', value: 1, tags: nil, data: { caller: 'SSO::Server::Warden::Strategies::Passport' }
+      expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.server.warden.strategies.passport.authentication', value: 1, tags: nil, data: { caller: 'SSO::Server::Warden::Strategies::Passport' }
       expect(::SSO.config.metric).to receive(:call).with type: :timing, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
       expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.valid_and_modified', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
       hook.call

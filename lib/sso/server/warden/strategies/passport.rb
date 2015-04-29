@@ -14,13 +14,16 @@ module SSO
             debug { 'Authenticating from Passport...' }
 
             authentication = passport_authentication
+            track key: 'server.warden.strategies.passport.authentication'
 
             if authentication.success?
               debug { 'Authentication on Server from Passport successful.' }
               debug { "Responding with #{authentication.object}" }
+              track key: "server.warden.strategies.passport.#{authentication.code}"
               custom! authentication.object
             else
               debug { 'Authentication from Passport on Server failed.' }
+              track key: "server.warden.strategies.passport.#{authentication.code}"
               custom! authentication.object
             end
 

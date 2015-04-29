@@ -123,11 +123,12 @@ module SSO
           end
 
           def meter(key, data = {})
-            options[:key] = "client.warden.hooks.after_fetch.#{key}"
-            options[:tags] = { scope: warden_scope }
+            metrics = {}
+            metrics[:key] = "client.warden.hooks.after_fetch.#{key}"
+            metrics[:tags] = { scope: warden_scope }
             data[:passport_id] = passport.id
-            options[:data] = data
-            track options
+            metrics[:data] = data
+            track metrics
           end
 
           # TODO: Use ActionDispatch remote IP or you might get the Load Balancer's IP instead :(
