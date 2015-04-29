@@ -12,7 +12,7 @@ module SSO
       end
       milliseconds = (seconds * 1000).round
       debug { "#{name || metric || 'Benchmark'} took #{milliseconds}ms" }
-      histogram key: metric, value: milliseconds if metric
+      timing key: metric, value: milliseconds if metric
       result
     end
   end

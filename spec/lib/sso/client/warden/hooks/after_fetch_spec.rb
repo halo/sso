@@ -60,7 +60,7 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true,
     end
 
     it 'meters the invalid passport' do
-      expect(::SSO.config.metric).to receive(:call).with type: :histogram, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
+      expect(::SSO.config.metric).to receive(:call).with type: :timing, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
       expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.invalid', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
       hook.call
     end
@@ -93,7 +93,7 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true,
     end
 
     it 'meters the invalid passport' do
-      expect(::SSO.config.metric).to receive(:call).with type: :histogram, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
+      expect(::SSO.config.metric).to receive(:call).with type: :timing, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
       expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.valid', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
       hook.call
     end
@@ -131,7 +131,7 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true,
     end
 
     it 'meters the invalid passport' do
-      expect(::SSO.config.metric).to receive(:call).with type: :histogram, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
+      expect(::SSO.config.metric).to receive(:call).with type: :timing, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
       expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.valid', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
       hook.call
     end
@@ -169,7 +169,7 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true,
     end
 
     it 'meters the invalid passport' do
-      expect(::SSO.config.metric).to receive(:call).with type: :histogram, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
+      expect(::SSO.config.metric).to receive(:call).with type: :timing, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
       expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.valid_and_modified', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
       hook.call
     end
@@ -208,7 +208,7 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true,
     end
 
     it 'meters the timeout' do
-      expect(::SSO.config.metric).to receive(:call).with type: :histogram, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
+      expect(::SSO.config.metric).to receive(:call).with type: :timing, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
       expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.server_unreachable', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
       hook.call
     end
@@ -231,7 +231,7 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true,
     end
 
     it 'meters the timeout' do
-      expect(::SSO.config.metric).to receive(:call).with type: :histogram, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
+      expect(::SSO.config.metric).to receive(:call).with type: :timing, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
       expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.server_response_not_parseable', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
       hook.call
     end
@@ -253,7 +253,7 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true,
     end
 
     it 'meters the timeout' do
-      expect(::SSO.config.metric).to receive(:call).with type: :histogram, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
+      expect(::SSO.config.metric).to receive(:call).with type: :timing, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
       expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.server_response_missing_success_flag', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
       hook.call
     end
@@ -275,7 +275,7 @@ RSpec.describe SSO::Client::Warden::Hooks::AfterFetch, type: :request, db: true,
     end
 
     it 'meters the timeout' do
-      expect(::SSO.config.metric).to receive(:call).with type: :histogram, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
+      expect(::SSO.config.metric).to receive(:call).with type: :timing, key: 'sso.client.passport.verification.duration', value: 42_000, tags: nil, data: { caller: 'SSO::Client::PassportVerifier' }
       expect(::SSO.config.metric).to receive(:call).with type: :increment, key: 'sso.client.warden.hooks.after_fetch.unexpected_server_response_status', value: 1, tags: { scope: nil }, data: { passport_id: client_passport.id, caller: 'SSO::Client::Warden::Hooks::AfterFetch' }
       hook.call
     end

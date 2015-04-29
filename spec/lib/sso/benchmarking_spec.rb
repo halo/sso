@@ -45,35 +45,37 @@ RSpec.describe ::SSO::Benchmarking do
         end
 
         it 'does not meter' do
-          expect(instance).to_not receive(:histogram)
+          expect(instance).to_not receive(:timing)
           instance.benchmark(name: 'Long calculation') {}
         end
       end
 
       context 'only with metric' do
         it 'logs with the metric' do
-          expect(instance).to receive(:debug) do |_, &block|
+          expect(instance).to receive(:debug).twice do |_, &block|
+            next if block.call.include?('Measuring')
             expect(block.call).to eq 'blob.serialization took 0ms'
           end
           instance.benchmark(metric: 'blob.serialization') {}
         end
 
-        it 'meters as histogram with the metric as name' do
-          expect(instance).to receive(:histogram).with key: 'blob.serialization', value: 0
+        it 'meters as timing with the metric as name' do
+          expect(instance).to receive(:timing).with key: 'blob.serialization', value: 0
           instance.benchmark(metric: 'blob.serialization') {}
         end
       end
 
       context 'with name and metric' do
         it 'logs with the name' do
-          expect(instance).to receive(:debug) do |_, &block|
+          expect(instance).to receive(:debug).twice do |_, &block|
+            next if block.call.include?('Measuring')
             expect(block.call).to eq 'Synchronous encryption took 0ms'
           end
           instance.benchmark(name: 'Synchronous encryption', metric: 'encryption.aes') {}
         end
 
-        it 'meters as histogram with the metric as name' do
-          expect(instance).to receive(:histogram).with key: 'encryption.aes', value: 0
+        it 'meters as timing with the metric as name' do
+          expect(instance).to receive(:timing).with key: 'encryption.aes', value: 0
           instance.benchmark(name: 'Synchronous encryption', metric: 'encryption.aes') {}
         end
       end
