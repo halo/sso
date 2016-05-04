@@ -5,9 +5,13 @@
 
 # Single-Sign-On using Doorkeeper and Warden
 
-**Current state of development:** Alpha at best!
+**IMPORTANT: PROJECT STATE:**
 
-This whole concept is already used in production by some, but I'm still not finished extracting all the code into a reusable gem to kickstart other developers who seek to implement it.
+This project had some lift-offs in production environments, but has since been discontinued.
+It solves many problems, but adds a complexity which makes it hard to spread the knowledge across a team of developers.
+A central, shared datastore (with all its problems) might still be easier to maintain as a team.
+The concept and the code remains for you to gather inspiration.
+There is a paid service called [Auth0](https://auth0.com) which essentially does what you find here.
 
 ## Philosophy
 
@@ -19,8 +23,8 @@ This whole concept is already used in production by some, but I'm still not fini
 
 ## Requirements
 
-* Client and server: **Ruby 2.1.0** (I like keywords arguments)
-* Server: **PostgreSQL** (I like the `uuid`, `inet` and `hstore` column types)
+* Client and server: **Ruby 2.1.0**
+* Server: **PostgreSQL** (For the `uuid`, `inet` and `hstore` column types)
 
 ## Setup
 
@@ -616,4 +620,4 @@ Good to know:
 
 # License
 
-MIT 2015 halo, see [LICENSE](https://github.com/halo/sso/blob/master/LICENSE.md)
+MIT 2016 halo, see [LICENSE](https://github.com/halo/sso/blob/master/LICENSE.md)
