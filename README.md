@@ -5,6 +5,12 @@
 
 # Single-Sign-On using Doorkeeper and Warden
 
+**MAINTAINED FORK:**
+
+This repository is unmaintained.
+Please proceed to [the fork of thejamespinto/sso](https://github.com/thejamespinto/sso) who was so [kind to continue](https://github.com/halo/sso/pull/2) this project.
+He is also in charge of releasing the rubygem.
+
 **PROJECT STATE:**
 
 This project had some lift-offs in production environments, but has since been discontinued.
